@@ -28,7 +28,7 @@ class PowerMaxAlarm : public uart::UARTDevice, public mqtt::CustomMQTTDevice, pu
   void setup() override;
   void loop() override;
 
-}
+};
 
 }  // namespace powermax
 }  // namespace mqtt
