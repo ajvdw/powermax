@@ -6,7 +6,7 @@
 #include "esphome/core/defines.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
-#include "esphome/components/mqtt/mqtt.h"
+#include "esphome/components/mqtt/custom_mqtt_device.h"
 
 namespace esphome {
 namespace mqtt {
