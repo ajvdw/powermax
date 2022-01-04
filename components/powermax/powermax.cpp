@@ -2,6 +2,7 @@
 #include "esphome/core/log.h"
 
 namespace esphome {
+namespace mqtt {
 namespace powermax {
 
 static const char *const TAG = "powermax";
@@ -35,5 +36,6 @@ bool PowerMaxAlarm::publish_json(const std::string &topic, const json::json_buil
 bool PowerMaxAlarm::is_connected() { return global_mqtt_client != nullptr && global_mqtt_client->is_connected(); }
 
 }  // namespace powermax
+}  // namespace mqtt
 }  // namespace esphome
 
