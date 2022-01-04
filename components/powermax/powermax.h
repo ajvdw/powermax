@@ -1,9 +1,12 @@
 #pragma once
 
-#include "esphome/core/defines.h"
-
+#include "esphome/components/uart/uart.h"
+#include "esphome/core/application.h"
 #include "esphome/core/component.h"
-#include "mqtt_client.h"
+#include "esphome/core/defines.h"
+#include "esphome/core/helpers.h"
+#include "esphome/core/log.h"
+#include "esphome/components/mqtt/mqtt_client.h"
 
 namespace esphome {
 namespace mqtt {
