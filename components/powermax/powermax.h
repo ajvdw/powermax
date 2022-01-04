@@ -22,7 +22,7 @@ namespace powermax {
  *  - `publish_json(topic, payload_builder, [qos], [retain])`
  *  - `is_connected()`
  */
-class PowerMaxAlarm : public uart::UARTDevice, public Component, public mqtt::CustomMQTTDevice {
+class PowerMaxAlarm : public uart::UARTDevice, public Component, public CustomMQTTDevice {
  public:
 
   void setup() override;
