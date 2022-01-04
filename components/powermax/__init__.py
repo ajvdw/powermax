@@ -14,18 +14,18 @@ DEPENDENCIES = ["uart"]
 CONF_POWERMAX_ID = "powermax_id"
 
 powermax_ns = cg.esphome_ns.namespace("esphome::powermax")
-PowerMax = powermax_ns.class_("PowerMax", uart.UARTDevice, cg.Component)
+PowerMaxAlarm = powermax_ns.class_("PowerMaxAlarm", uart.UARTDevice, cg.Component)
 
 POWERMAX_COMPONENT_SCHEMA = cv.COMPONENT_SCHEMA.extend(
     {
-        cv.Required(CONF_POWERMAX_ID): cv.use_id(PowerMax),
+        cv.Required(CONF_POWERMAX_ID): cv.use_id(PowerMaxAlarm),
     }
 )
 
 CONFIG_SCHEMA = (
     cv.Schema(
         {
-            cv.GenerateID(): cv.declare_id(PowerMax),
+            cv.GenerateID(): cv.declare_id(PowerMaxAlarm),
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
