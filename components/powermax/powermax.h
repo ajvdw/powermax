@@ -8,6 +8,8 @@
 #include "esphome/core/log.h"
 #include "esphome/components/mqtt/custom_mqtt_device.h"
 
+#include "pmax/pmax.h"
+
 namespace esphome {
 namespace mqtt {
 namespace powermax {
