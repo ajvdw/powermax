@@ -6,7 +6,7 @@
 #include "esphome/core/defines.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
-#include "esphome/components/mqtt/mqtt_client.h"
+#include "esphome/components/mqtt/mqtt.h"
 
 namespace esphome {
 namespace mqtt {
@@ -22,7 +22,7 @@ namespace powermax {
  *  - `publish_json(topic, payload_builder, [qos], [retain])`
  *  - `is_connected()`
  */
-class PowerMaxAlarm : public uart::UARTDevice, public Component, public CustomMQTTDevice {
+class PowerMaxAlarm : public uart::UARTDevice, public mqtt::CustomMQTTDevice, public Component {
  public:
 
   void setup() override;
