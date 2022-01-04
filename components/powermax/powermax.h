@@ -9,7 +9,7 @@
 #include "esphome/components/mqtt/mqtt_client.h"
 
 namespace esphome {
-namespace mqtt {
+namespace powermax {
 
 /** This class is a helper class for custom components that communicate using
  * MQTT. It has 5 helper functions that you can use (square brackets indicate optional):
@@ -222,7 +222,7 @@ void PowerMaxAlarm::subscribe_json(const std::string &topic, void (T::*callback)
   global_mqtt_client->subscribe_json(topic, f, qos);
 }
 
-}  // namespace mqtt
+}  // namespace powermax
 }  // namespace esphome
 
 
