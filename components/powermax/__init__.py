@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 
-from esphome.components import uart
+from esphome.components import uart, mqtt
 from esphome.const import (
     CONF_ID,
 )
@@ -30,6 +30,7 @@ CONFIG_SCHEMA = (
     )
     .extend(cv.COMPONENT_SCHEMA)
     .extend(uart.UART_DEVICE_SCHEMA)
+    .extend(mqtt.MQTT_DEVICE_SCHEMA)
 )
 
 async def to_code(config):
