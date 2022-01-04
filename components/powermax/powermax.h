@@ -23,8 +23,8 @@ namespace powermax {
 class PowerMaxAlarm : public uart::UARTDevice, public Component {
  public:
 
-  void PowerMaxAlarm::setup(); override
-  void PowerMaxAlarm::loop(); override
+  void PowerMaxAlarm::setup() override;
+  void PowerMaxAlarm::loop() override;
 
   /** Subscribe to an MQTT topic with the given Quality of Service.
    *
