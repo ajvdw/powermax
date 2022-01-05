@@ -15,6 +15,9 @@ namespace mqtt {
 namespace powermax {
 
 #define PRINTF_BUF 512
+#define ALARM_STATE_CHANGE 0
+#define ZONE_STATE_CHANGE 1
+
 
 /** This class is a helper class for custom components that communicate using
  * MQTT. It has 5 helper functions that you can use (square brackets indicate optional):
@@ -34,6 +37,15 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
 ////////////////////////////////////////////////
     bool zone_motion[MAX_ZONE_COUNT+1] = {0};
     bool arming = false;
+    //Inactivity timer wil always default to this value on boot (it is not stored in EEPROM at the moment, though only resets when the Powermax power cycles (hence rarely))
+    int inactivity_seconds = 20;
+
+    bool arming = false;
+
+    //Variables for managing zones
+    int zones_enrolled_count = MAX_ZONE_COUNT;
+    int max_zone_id_enrolled = MAX_ZONE_COUNT;
+
 
     virtual void OnStatusChange(const PlinkBuffer  * Buff)
     {
@@ -88,7 +100,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
               const unsigned char zoneId = Buff->buffer[5];
               ZoneEvent eventType = (ZoneEvent)Buff->buffer[6];
               
-              SendMQTTMessage(this->getZoneName(zoneId), GetStrPmaxZoneEventTypes(Buff->buffer[6]), zoneId, ZONE_STATE_CHANGE);
+//SendMQTTMessage(this->getZoneName(zoneId), GetStrPmaxZoneEventTypes(Buff->buffer[6]), zoneId, ZONE_STATE_CHANGE);
               //If it is a Violated (motion) event then set zone activated
               if (eventType == ZE_Violated) {
                   zone_motion[zoneId] = true;
@@ -113,7 +125,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         //zoneTripped    : specifies zone that initiated the alarm, values from PmaxEventSource
         //zoneTrippedStr : zone name
 
-        SendMQTTMessage("Triggered", zoneTrippedStr, 0, ALARM_STATE_CHANGE);
+//SendMQTTMessage("Triggered", zoneTrippedStr, 0, ALARM_STATE_CHANGE);
 
     }
 
@@ -125,7 +137,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         //whoDisarmed    : specifies who cancelled the alarm (for example a keyfob 1), values from PmaxEventSource
         //whoDisarmedStr : text representation of who disarmed
         
-        SendMQTTMessage("Canceled" , whoDisarmedStr, 0, ALARM_STATE_CHANGE);
+//SendMQTTMessage("Canceled" , whoDisarmedStr, 0, ALARM_STATE_CHANGE);
     }
 
     void SendAlarmState()
