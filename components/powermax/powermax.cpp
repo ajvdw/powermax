@@ -34,6 +34,7 @@ void setup() {
 void PowerMaxAlarm::setup() {
   ESP_LOGD(TAG, "Setup");
   pma_ = this;
+  uart_ = (uart::UARTDevice *)this;
 }
 
 void PowerMaxAlarm::loop() {
