@@ -136,8 +136,8 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         PowerMaxAlarm::OnAlarmCancelled( whoDisarmed, whoDisarmedStr );
         //whoDisarmed    : specifies who cancelled the alarm (for example a keyfob 1), values from PmaxEventSource
         //whoDisarmedStr : text representation of who disarmed
-        
-        SendMQTTMessage("Canceled" , whoDisarmedStr, 0, ALARM_STATE_CHANGE);
+        //Canceled
+        SendMQTTMessage("disarmed" , whoDisarmedStr, 0, ALARM_STATE_CHANGE);  
     }
 
     void SendAlarmState()
@@ -156,7 +156,8 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
             break;
           case SS_Armed_Away:
             SendMQTTMessage( "Arm Away", "", 0, ALARM_STATE_CHANGE);
-            break;    
+            break;
+          case SS_Entry_Delay:    
           case SS_User_Test:
           case SS_Downloading:
           case SS_Programming:

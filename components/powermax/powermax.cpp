@@ -48,35 +48,8 @@ void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsi
   char zoneIDtext[10];
   itoa(zoneID, zoneIDtext, 10);
 
-  char hassZoneOrEvent[50];
-
-  strcpy(hassZoneOrEvent,"unknown");
   
   // Translate from pmax.cpp - PmaxLogEvents to hass MQTT accepted payloads.
-  if(ZoneOrEvent=="Arm Home" || ZoneOrEvent=="Quick Arm Home")
-  { 
-    strcpy(hassZoneOrEvent,"armed_home"); 
-  }
-  else if(ZoneOrEvent=="Arm Away" || ZoneOrEvent=="Quick Arm Away")
-  {
-    strcpy(hassZoneOrEvent,"armed_away");
-  }
-  else if(ZoneOrEvent=="Disarm")
-  {
-    strcpy(hassZoneOrEvent,"disarmed");
-  }
-  else if(ZoneOrEvent=="Arming")
-  {
-    strcpy(hassZoneOrEvent,"arming");
-  }
-  else if(ZoneOrEvent=="Triggered" )
-  {
-    strcpy(hassZoneOrEvent,"triggered");
-  }
-  else if(ZoneOrEvent=="Canceled" )
-  {
-    strcpy(hassZoneOrEvent,"disarmed");
-  }
 
 
   DEBUG(LOG_NOTICE,"Creating JSON string for MQTT");
@@ -94,7 +67,7 @@ void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsi
     //Send alarm state
    
 
-    if (mqttClient.publish(mqttAlarmStateTopic, hassZoneOrEvent, true) == true) {  // Send translated mqtt message and retain last known status
+    if (mqttClient.publish(mqttAlarmStateTopic, ZoneOrEvent, true) == true) {  // Send translated mqtt message and retain last known status
        DEBUG(LOG_NOTICE,"Success sending MQTT message");
       } else {
        DEBUG(LOG_NOTICE,"Error sending MQTT message");
