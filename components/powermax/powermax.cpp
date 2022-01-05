@@ -4,7 +4,7 @@
 
 uint8_t DebugLevel; // To satisfy the compiler TODO
 
-UARTComponent *uart_; 
+uart::UARTComponent *uart_; 
 
 namespace esphome {
 namespace mqtt {
