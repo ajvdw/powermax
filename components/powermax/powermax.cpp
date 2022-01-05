@@ -1,14 +1,14 @@
 #include "powermax.h"
 #include "esphome/core/log.h"
 
+uint8_t DebugLevel; // To satisfy the compiler TODO
+uart::UARTComponent *uart; 
+
 namespace esphome {
 namespace mqtt {
 namespace powermax {
 
 static const char *const TAG = "powermax";
-
-uint8_t DebugLevel; // To satisfy the compiler TODO
-uart::UARTComponent *uart; 
 
 /*
 void setup() {
