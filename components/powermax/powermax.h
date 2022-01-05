@@ -167,7 +167,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         }
     }
     
-    void LogMessage( int prio, const char *buf )
+    void MessageLogger( int prio, const char *buf )
     {
       switch( prio )
       {
@@ -189,7 +189,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
           break;
       }         
     }
-    
+
     void CheckInactivityTimers() {
         for(int ix=1; ix<=max_zone_id_enrolled; ix++) {
             if (zone_motion[ix]) {
