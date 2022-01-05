@@ -82,7 +82,7 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
   char buf[256];
   va_list ap;
 
-  vsnprintf(buf, sizeof(buf), format, ap)
+  vsnprintf(buf, sizeof(buf), format, ap);
 
   switch( priority )
   {
