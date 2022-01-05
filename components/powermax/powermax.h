@@ -33,6 +33,8 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
 
 ////////////////////////////////////////////////
     bool zone_motion[MAX_ZONE_COUNT+1] = {0};
+    bool arming = false;
+
     virtual void OnStatusChange(const PlinkBuffer  * Buff)
     {
         //call base class implementation first, this will send ACK back and upate internal state.
