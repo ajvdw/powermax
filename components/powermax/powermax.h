@@ -167,6 +167,29 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         }
     }
     
+    void LogMessage( int prio, const char *buf )
+    {
+      switch( prio )
+      {
+        case LOG_EMERG:	
+        case LOG_ALERT:
+        case LOG_CRIT:	
+        case LOG_ERR:
+          ESP_LOGE(TAG,buf);
+          break;
+        case LOG_WARNING:
+          ESP_LOGW(TAG,buf);
+          break;
+        case LOG_NOTICE:
+        case LOG_INFO:
+          ESP_LOGI(TAG,buf);
+          break;
+        case LOG_DEBUG
+          ESP_LOGD(TAG,buf);
+          break;
+      }         
+    }
+    
     void CheckInactivityTimers() {
         for(int ix=1; ix<=max_zone_id_enrolled; ix++) {
             if (zone_motion[ix]) {

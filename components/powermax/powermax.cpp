@@ -87,28 +87,7 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
 
   esphome::ESP_LOGE( TAG, LOG_STR((const char*)buf) );
 
- /*
-  switch( priority )
-  {
-    case LOG_EMERG:	
-    case LOG_ALERT:
-    case LOG_CRIT:	
-    case LOG_ERR:
-      ESP_LOGE(TAG,buf);
-      break;
-    case LOG_WARNING:
-      ESP_LOGW(TAG,buf);
-      break;
-    case LOG_NOTICE:
-    case LOG_INFO:
-      ESP_LOGI(TAG,buf);
-      break;
-    case LOG_DEBUG
-      ESP_LOGD(TAG,buf);
-      break;
-    
-  }
-  */
+ 
 
 }
 
