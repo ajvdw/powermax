@@ -15,6 +15,7 @@ namespace mqtt {
 namespace powermax {
 
 #define PRINTF_BUF 512
+uint8_t DebugLevel; // To satisfy the compiler TODO
 
 
 /** This class is a helper class for custom components that communicate using
