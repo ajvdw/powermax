@@ -176,17 +176,17 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         case LOG_ALERT:
         case LOG_CRIT:	
         case LOG_ERR:
-          ESP_LOGE(TAG,{buf});
+          ESP_LOGE(TAG,"%s",buf);
           break;
         case LOG_WARNING:
-          ESP_LOGW(TAG,{buf});
+          ESP_LOGW(TAG,"%s",buf);
           break;
         case LOG_NOTICE:
         case LOG_INFO:
-          ESP_LOGI(TAG,{buf});
+          ESP_LOGI(TAG,"%s",buf);
           break;
         case LOG_DEBUG
-          ESP_LOGD(TAG,{buf});
+          ESP_LOGD(TAG,"%s",buf);
           break;
       }         
     }
