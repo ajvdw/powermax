@@ -44,7 +44,7 @@ void PowerMaxDevice::loop() {
   static uint32_t lastMsg = 0;
 
   //Handle incoming messages
-  if( this->serial_handler() )
+  if( this->serial_handler_() )
     lastMsg = millis();
 
   //we ensure a small delay between commands, as it can confuse the alarm (it has a slow CPU)
