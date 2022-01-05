@@ -4,9 +4,13 @@
 
 uint8_t DebugLevel; // To satisfy the compiler TODO
 
-uart::UARTComponent *uart_; 
+
 
 namespace esphome {
+namespace uart {
+
+UARTComponent *uart_; 
+
 namespace mqtt {
 namespace powermax {
 
@@ -37,8 +41,10 @@ void PowerMaxAlarm::setup() {
 
 void PowerMaxAlarm::loop() {
 }
+
 }  // namespace powermax
 }  // namespace mqtt
+}  // namespace uart
 }  // namespace esphome
 
 void sha1_pin( char in1, char in2, char *out)
