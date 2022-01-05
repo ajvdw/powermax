@@ -37,6 +37,98 @@ void PowerMaxDevice::setup() {
 void PowerMaxDevice::loop() {
 }
 
+void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID, int zone_or_system_update) 
+{
+
+  //SERIALPORT.println("MQTT Message initialized");
+  char message_text[600];
+  message_text[0] = '\0';
+
+  //Convert zone ID to text
+  char zoneIDtext[10];
+  itoa(zoneID, zoneIDtext, 10);
+
+  char hassZoneOrEvent[50];
+
+  strcpy(hassZoneOrEvent,"unknown");
+  
+  // Translate from pmax.cpp - PmaxLogEvents to hass MQTT accepted payloads.
+  if(ZoneOrEvent=="Arm Home" || ZoneOrEvent=="Quick Arm Home")
+  { 
+    strcpy(hassZoneOrEvent,"armed_home"); 
+  }
+  else if(ZoneOrEvent=="Arm Away" || ZoneOrEvent=="Quick Arm Away")
+  {
+    strcpy(hassZoneOrEvent,"armed_away");
+  }
+  else if(ZoneOrEvent=="Disarm")
+  {
+    strcpy(hassZoneOrEvent,"disarmed");
+  }
+  else if(ZoneOrEvent=="Arming")
+  {
+    strcpy(hassZoneOrEvent,"arming");
+  }
+  else if(ZoneOrEvent=="Triggered" )
+  {
+    strcpy(hassZoneOrEvent,"triggered");
+  }
+  else if(ZoneOrEvent=="Canceled" )
+  {
+    strcpy(hassZoneOrEvent,"disarmed");
+  }
+
+
+  DEBUG(LOG_NOTICE,"Creating JSON string for MQTT");
+  //Build key JSON headers and structure  
+  if (zone_or_system_update == ALARM_STATE_CHANGE) {
+    
+
+    //Here we have an alarm status change (zone 0) so put the status into JSON
+    strncpy(message_text, "{\r\n\"stat_str\": \"", 600);
+    strcat(message_text, ZoneOrEvent);
+    strcat(message_text, "\",\r\n\"stat_update_from\": \"");
+    strcat(message_text, WhoOrState);
+    strcat(message_text, "\"");
+    strcat(message_text, "\r\n}\r\n");
+    //Send alarm state
+   
+
+    if (mqttClient.publish(mqttAlarmStateTopic, hassZoneOrEvent, true) == true) {  // Send translated mqtt message and retain last known status
+       DEBUG(LOG_NOTICE,"Success sending MQTT message");
+      } else {
+       DEBUG(LOG_NOTICE,"Error sending MQTT message");
+      }   
+      
+
+  }
+  else if (zone_or_system_update == ZONE_STATE_CHANGE) {
+    //Here we have a zone status change so put this information into JSON
+    strncpy(message_text, "{\r\n\"zone_id\": \"", 600);
+    strcat(message_text, zoneIDtext);
+    strcat(message_text, "\",\r\n\"zone_name\": \"");
+    strcat(message_text, ZoneOrEvent);
+    strcat(message_text, "\",\r\n\"zone_status\": \"");
+    strcat(message_text, WhoOrState);
+    strcat(message_text, "\"");
+    strcat(message_text, "\r\n}\r\n");
+    
+    //Send zone state
+
+    char zoneStateTopic[100];
+    zoneStateTopic[0] = '\0';
+    strncpy(zoneStateTopic, hassmqttZoneStateTopic, 100);
+    strcat(zoneStateTopic, zoneIDtext);
+    
+    if (mqttClient.publish(zoneStateTopic, message_text, true) == true) {  // Send mqtt message and retain last known status and sends in sub topic with the zoneID.
+       DEBUG(LOG_NOTICE,"Success sending MQTT message");
+      } else {
+       DEBUG(LOG_NOTICE,"Error sending MQTT message");
+      }  
+  }
+ 
+}
+
 
 }  // namespace powermax
 }  // namespace mqtt
