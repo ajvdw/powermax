@@ -67,11 +67,11 @@ void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsi
     //Send alarm state
    
 
-    if (mqttClient.publish(mqttAlarmStateTopic, ZoneOrEvent, true) == true) {  // Send translated mqtt message and retain last known status
-       DEBUG(LOG_NOTICE,"Success sending MQTT message");
-      } else {
-       DEBUG(LOG_NOTICE,"Error sending MQTT message");
-      }   
+  // TODO if (mqttClient.publish(mqttAlarmStateTopic, ZoneOrEvent, true) == true) {  // Send translated mqtt message and retain last known status
+  //     DEBUG(LOG_NOTICE,"Success sending MQTT message");
+  //    } else {
+  //     DEBUG(LOG_NOTICE,"Error sending MQTT message");
+  //    }   
       
 
   }
@@ -93,11 +93,11 @@ void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsi
     strncpy(zoneStateTopic, hassmqttZoneStateTopic, 100);
     strcat(zoneStateTopic, zoneIDtext);
     
-    if (mqttClient.publish(zoneStateTopic, message_text, true) == true) {  // Send mqtt message and retain last known status and sends in sub topic with the zoneID.
-       DEBUG(LOG_NOTICE,"Success sending MQTT message");
-      } else {
-       DEBUG(LOG_NOTICE,"Error sending MQTT message");
-      }  
+   // TODO if (mqttClient.publish(zoneStateTopic, message_text, true) == true) {  // Send mqtt message and retain last known status and sends in sub topic with the zoneID.
+   //    DEBUG(LOG_NOTICE,"Success sending MQTT message");
+   //   } else {
+  //   DEBUG(LOG_NOTICE,"Error sending MQTT message");
+   //   }  
   }
  
 }
