@@ -78,6 +78,10 @@ void PowerMaxDevice::on_message(const std::string &topic, const std::string &pay
           ESP_LOGD(TAG,"Error sending MQTT message"); 
       }
       else if (zone_or_system_update == ZONE_STATE_CHANGE) {
+        //Convert zone ID to text
+        char zoneIDtext[10]; 
+        itoa(zoneID, zoneIDtext, 10);
+
         //Here we have a zone status change so put this information into JSON
         std::string message_text;
         message_text += "{\"zone_id\": \"";
@@ -90,12 +94,7 @@ void PowerMaxDevice::on_message(const std::string &topic, const std::string &pay
         message_text +=  "}";
         
         //Send zone state
-        std::string zone_state_topic = App.get_name() + "/zone/state/";
-        //Convert zone ID to text
-        char zoneIDtext[10]; 
-        itoa(zoneID, zoneIDtext, 10);
-        zone_state_topic += zoneIDtext;
-
+        std::string zone_state_topic = App.get_name() + "/zone/state/" + zoneIDtext;
         if( this->publish(zone_state_topic, message_text, 0, true ) )
           ESP_LOGD(TAG,"Success sending MQTT message");
         else
