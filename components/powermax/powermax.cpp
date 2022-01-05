@@ -44,7 +44,7 @@ void sha1_pin( char in1, char in2, char *out)
 {
   char tmp[25];
   sprintf( tmp, "KorreltjeZout%02x#02x", in1, in2 );
-  String c = sha1(tmp);
+  //TODO String c = sha1(tmp);
   sprintf( out, "%s", c.c_str() );  
 }
 
@@ -131,7 +131,7 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
 
 int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
-    pma_->write((const uint8_t*)dataToWrite, bytesToWrite);
+    pma_->write_array((const uint8_t*)dataToWrite, bytesToWrite);
     return bytesToWrite;
 }
 
