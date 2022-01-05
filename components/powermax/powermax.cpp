@@ -50,17 +50,17 @@ void sha1_pin( char in1, char in2, char *out)
 
 int log_console_setlogmask(int mask)
 {
-  int oldmask = telnetDbgLevel;
+  int oldmask = DebugLevel;
   if(mask == 0)
     return oldmask; /* POSIX definition for 0 mask */
-  telnetDbgLevel = mask;
+  DebugLevel = mask;
   return oldmask;
 } 
 
 
 void os_debugLog(int priority, bool raw, const char *function, int line, const char *format, ...)
 {
-  if(priority <= telnetDbgLevel)
+  if(priority <= DebugLevel)
   {
     char buf[PRINTF_BUF];
     va_list ap;
