@@ -2,7 +2,8 @@
 #include "esphome/core/log.h"
 
 uint8_t DebugLevel; // To satisfy the compiler TODO
-uart::UARTComponent *uart; 
+
+UARTComponent *uart; 
 
 namespace esphome {
 namespace mqtt {
