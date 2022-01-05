@@ -179,9 +179,6 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
     }
 
   void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID, int zone_or_system_update) {
-      char message_text[600];
-      message_text[0] = '\0';
-
       //Convert zone ID to text
       char zoneIDtext[10];
       itoa(zoneID, zoneIDtext, 10);
@@ -190,16 +187,21 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
       ESP_LOGD(TAG,"Creating JSON string for MQTT");
       //Build key JSON headers and structure  
       if (zone_or_system_update == ALARM_STATE_CHANGE) {
+        std::string message_text;
+
         //Here we have an alarm status change (zone 0) so put the status into JSON
-        strncpy(message_text, "{\r\n\"stat_str\": \"", 600);
-        strcat(message_text, ZoneOrEvent);
-        strcat(message_text, "\",\r\n\"stat_update_from\": \"");
-        strcat(message_text, WhoOrState);
-        strcat(message_text, "\"");
-        strcat(message_text, "\r\n}\r\n");
+        message_text += "{\"stat_str\": \"";
+        message_text += ZoneOrEvent);
+        message_text += "\",\"stat_update_from\": \"");
+        message_text += WhoOrState);
+        message_text += "\"");
+        message_text += "}");
         //Send alarm state
       
 
+      //MQTT topic for Zone state information output from Powermax alarm
+
+      // const char* mqttAlarmStateTopic = "powermax/alarm/state";
       // TODO if (mqttClient.publish(mqttAlarmStateTopic, ZoneOrEvent, true) == true) {  // Send translated mqtt message and retain last known status
       //     ESP_LOGD(TAG,"Success sending MQTT message");
       //    } else {
@@ -210,14 +212,15 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
       }
       else if (zone_or_system_update == ZONE_STATE_CHANGE) {
         //Here we have a zone status change so put this information into JSON
-        strncpy(message_text, "{\r\n\"zone_id\": \"", 600);
-        strcat(message_text, zoneIDtext);
-        strcat(message_text, "\",\r\n\"zone_name\": \"");
-        strcat(message_text, ZoneOrEvent);
-        strcat(message_text, "\",\r\n\"zone_status\": \"");
-        strcat(message_text, WhoOrState);
-        strcat(message_text, "\"");
-        strcat(message_text, "\r\n}\r\n");
+        std::string message_text;
+        message_text += "{\"zone_id\": \"" );
+        message_text +=  zoneIDtext);
+        message_text +=  "\",\"zone_name\": \"");
+        message_text +=  ZoneOrEvent);
+        message_text +=  "\",\"zone_status\": \"");
+        message_text +=  WhoOrState);
+        message_text +=  "\"");
+        message_text +=  "}");
         
         //Send zone state
 
@@ -225,7 +228,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
       // zoneStateTopic[0] = '\0';
       // strncpy(zoneStateTopic, hassmqttZoneStateTopic, 100);
       // strcat(zoneStateTopic, zoneIDtext);
-        
+      //  const char* mqttZoneStateTopic = "powermax/zone/state";
       // TODO if (mqttClient.publish(zoneStateTopic, message_text, true) == true) {  // Send mqtt message and retain last known status and sends in sub topic with the zoneID.
       //    ESP_LOGD(TAG,"Success sending MQTT message");
       //   } else {
