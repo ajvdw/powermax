@@ -76,16 +76,16 @@ int log_console_setlogmask(int mask)
   return oldmask;
 } 
 
-void os_debugLog(int priority, bool raw, const char *function, int line, const char *format, ...)
+void os_debugLog(int priority, bool raw, const char *function, int line, const char *formt, ...)
 { 
 
   char buf[256];
   va_list ap;
-  va_start(ap, format);
-  vsnprintf(buf, sizeof(buf), format, ap);  
+  va_start(ap, formt);
+  vsnprintf(buf, sizeof(buf), formt, ap);  
   va_end(ap);
 
-  esphome::ESP_LOGD(TAG,format,"" );
+  esphome::ESP_LOGD(TAG,formt,"" );
 
  /*
   switch( priority )
