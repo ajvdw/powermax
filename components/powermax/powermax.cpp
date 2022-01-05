@@ -78,33 +78,30 @@ int log_console_setlogmask(int mask)
 
 void os_debugLog(int priority, bool raw, const char *function, int line, const char *format, ...)
 {
-  if(priority <= DebugLevel)
-  {
-    char buf[PRINTF_BUF];
-    va_list ap;
-    
-    va_start(ap, format);
+  va_list ap;
+  
+  va_start(ap, format);
 
-    switch( priority )
-    {
-      case LOG_EMERG:	
-      case LOG_ALERT:
-      case LOG_CRIT:	
-      case LOG_ERR:
-        ESP_LOGE(TAG, format, ap );
-        break;
-      case LOG_WARNING:
-        ESP_LOGW(TAG, format, ap );
-        break;
-      case LOG_NOTICE:
-      case LOG_INFO:
-        ESP_LOGI(TAG, format, ap );
-        break;
-      case LOG_DEBUG
-        ESP_LOGD(TAG, format, ap );
-        break;
-    }
+  switch( priority )
+  {
+    case LOG_EMERG:	
+    case LOG_ALERT:
+    case LOG_CRIT:	
+    case LOG_ERR:
+      ESP_LOGE(TAG, format, ap );
+      break;
+    case LOG_WARNING:
+      ESP_LOGW(TAG, format, ap );
+      break;
+    case LOG_NOTICE:
+    case LOG_INFO:
+      ESP_LOGI(TAG, format, ap );
+      break;
+    case LOG_DEBUG
+      ESP_LOGD(TAG, format, ap );
+      break;
   }
+  va_end(ap);
 }
 
 void os_usleep(int microseconds)
