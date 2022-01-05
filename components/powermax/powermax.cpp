@@ -51,9 +51,10 @@ void PowerMaxDevice::loop() {
     this->sendNextCommand();
 
   if( this->restoreCommsIfLost()) //if we fail to get PINGs from the alarm - we will attempt to restore the connection
+  {
       DEBUG(LOG_WARNING,"Connection lost. Sending RESTORE request.");   
-
-  ESP_LOGD(TAG, "Loop");
+      ESP_LOGD(TAG, "Loop");
+  }
 }
 
 void PowerMaxDevice::log( int priority, const char* buf) {
