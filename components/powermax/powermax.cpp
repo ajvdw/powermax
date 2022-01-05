@@ -38,24 +38,21 @@ void PowerMaxDevice::setup() {
 }
 
 void PowerMaxDevice::loop() {
-  
+
   this->CheckInactivityTimers();
 
-  static u_int32_t lastMsg = 0;
-  if( this->serial_handler(pm) )
-  {
-    lastMsg = millis();
-  }
+  static uint32_t lastMsg = 0;
 
-  if(millis() - lastMsg > 300 || millis() < lastMsg) //we ensure a small delay between commands, as it can confuse the alarm (it has a slow CPU)
-  {
+  //Handle incoming messages
+  if( this->serial_handler() )
+    lastMsg = millis();
+
+  //we ensure a small delay between commands, as it can confuse the alarm (it has a slow CPU)
+  if(millis() - lastMsg > 300 || millis() < lastMsg) 
     this->sendNextCommand();
-  }
 
   if( this->restoreCommsIfLost()) //if we fail to get PINGs from the alarm - we will attempt to restore the connection
-  {
       DEBUG(LOG_WARNING,"Connection lost. Sending RESTORE request.");   
-  }   
 
 }
 
