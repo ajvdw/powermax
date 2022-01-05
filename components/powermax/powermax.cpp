@@ -9,8 +9,6 @@ namespace powermax {
 
 static const char *const TAG = "powermax";
 
-
-PowerMaxAlarm *pma_; 
 uart::UARTDevice *uart_;
 
 /*
@@ -33,7 +31,6 @@ void setup() {
 */
 void PowerMaxAlarm::setup() {
   ESP_LOGD(TAG, "Setup");
-  pma_ = this;
   uart_ = (uart::UARTDevice *)this;
 }
 
@@ -109,19 +106,19 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
     {
         for(int ix=0; ix<10; ix++)
         {
-          if(pma_->available())
+          if(uart_->available())
           {
             break;
           }
           delay(5);
         }
         
-        if(pma_->available() == false)
+        if(uart_->available() == false)
         {
             break;
         }
 
-        *((char*)readBuff) = pma_->read();
+        *((char*)readBuff) = uart_->read();
         dwTotalRead ++;
         readBuff = ((char*)readBuff) + 1;
         bytesToRead--;
@@ -132,7 +129,7 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
 
 int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
-    pma_->write_array((const uint8_t*)dataToWrite, bytesToWrite);
+    uart_->write_array((const uint8_t*)dataToWrite, bytesToWrite);
     return bytesToWrite;
 }
 
