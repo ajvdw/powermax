@@ -14,18 +14,18 @@ DEPENDENCIES = ["uart"]
 CONF_POWERMAX_ID = "powermax_id"
 
 powermax_ns = cg.esphome_ns.namespace("esphome::mqtt::powermax")
-PowerMaxAlarm = powermax_ns.class_("PowerMaxAlarm", uart.UARTDevice, cg.Component)
+PowerMaxDevice = powermax_ns.class_("PowerMaxDevice", uart.UARTDevice, cg.Component)
 
 POWERMAX_COMPONENT_SCHEMA = cv.COMPONENT_SCHEMA.extend(
     {
-        cv.Required(CONF_POWERMAX_ID): cv.use_id(PowerMaxAlarm),
+        cv.Required(CONF_POWERMAX_ID): cv.use_id(PowerMaxDevice),
     }
 )
 
 CONFIG_SCHEMA = (
     cv.Schema(
         {
-            cv.GenerateID(): cv.declare_id(PowerMaxAlarm),
+            cv.GenerateID(): cv.declare_id(PowerMaxDevice),
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
@@ -37,4 +37,3 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
-    

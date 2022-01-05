@@ -11,8 +11,6 @@ namespace powermax {
 
 static const char *const TAG = "powermax";
 
-
-
 /*
 void setup() {
    *     subscribe("the/topic", &MyCustomMQTTDevice::on_message);
@@ -31,12 +29,12 @@ void setup() {
    *     }
    *   }
 */
-void PowerMaxAlarm::setup() {
+void PowerMaxDevice::setup() {
   ESP_LOGD(TAG, "Setup");
   global_uart = (uart::UARTDevice *)this;
 }
 
-void PowerMaxAlarm::loop() {
+void PowerMaxDevice::loop() {
 }
 
 
