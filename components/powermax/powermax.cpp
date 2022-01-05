@@ -85,7 +85,7 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
   vsnprintf(buf, sizeof(buf), formt, ap);  
   va_end(ap);
 
-  esphome::ESP_LOGE( tag, (const char*)buf );
+  esphome::ESP_LOGE( TAG, LOG_STR((const char*)buf) );
 
  /*
   switch( priority )
