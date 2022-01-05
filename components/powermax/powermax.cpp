@@ -49,7 +49,9 @@ void PowerMaxDevice::loop() {
 void PowerMaxDevice::on_message(const std::string &topic, const std::string &payload) {
   // do something with topic and payload
   ESP_LOGD(TAG,"Payload %s on topic %s received",payload.c_str(), topic.c_str());
-  ESP_LOGD(TAG,"Prefix %s", this->get_default_object_id_() );
+  ESP_LOGD(TAG,"Prefix %s", App.get_name() );
+      //  const std::string &node_name = App.get_name();
+       // std::string unique_id = this->unique_id();
 
   if (payload=="DISARM")
     this->sendCommand(Pmax_DISARM);  
