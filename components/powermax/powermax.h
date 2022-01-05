@@ -39,9 +39,6 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
     bool arming = false;
     //Inactivity timer wil always default to this value on boot (it is not stored in EEPROM at the moment, though only resets when the Powermax power cycles (hence rarely))
     int inactivity_seconds = 20;
-
-    bool arming = false;
-
     //Variables for managing zones
     int zones_enrolled_count = MAX_ZONE_COUNT;
     int max_zone_id_enrolled = MAX_ZONE_COUNT;
@@ -160,7 +157,17 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
           case SS_Armed_Away:
             SendMQTTMessage( "Arm Away", "", 0, ALARM_STATE_CHANGE);
             break;    
-          
+          case SS_User_Test:
+          case SS_Downloading:
+          case SS_Programming:
+          case SS_Installer:
+          case SS_Home_Bypass:
+          case SS_Away_Bypass:
+          case SS_Ready:
+          case SS_Not_Ready:
+              // Do NOTHING
+              break;
+
         }
     }
     
