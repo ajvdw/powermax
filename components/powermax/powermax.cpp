@@ -11,7 +11,7 @@ static const char *const TAG = "powermax";
 
 
 PowerMaxAlarm *pma_; 
-
+uart::UARTDevice *uart_;
 
 /*
 void setup() {
