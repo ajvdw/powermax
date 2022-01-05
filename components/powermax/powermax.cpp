@@ -138,19 +138,19 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
     {
         for(int ix=0; ix<10; ix++)
         {
-          if(esphome::mqtt::powermax::global_pmd->->available())
+          if(esphome::mqtt::powermax::global_pmd->available())
           {
             break;
           }
           delay(5);
         }
         
-        if(esphome::mqtt::powermax::global_pmd->->available() == false)
+        if(esphome::mqtt::powermax::global_pmd->available() == false)
         {
             break;
         }
 
-        *((char*)readBuff) = esphome::mqtt::powermax::global_pmd->->read();
+        *((char*)readBuff) = esphome::mqtt::powermax::global_pmd->read();
         dwTotalRead ++;
         readBuff = ((char*)readBuff) + 1;
         bytesToRead--;
