@@ -115,19 +115,19 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
     {
         for(int ix=0; ix<10; ix++)
         {
-          if(uart->available())
+          if(uart_->available())
           {
             break;
           }
           delay(5);
         }
         
-        if(uart->available() == false)
+        if(uart_->available() == false)
         {
             break;
         }
 
-        *((char*)readBuff) = uart->read();
+        *((char*)readBuff) = uart_->read();
         dwTotalRead ++;
         readBuff = ((char*)readBuff) + 1;
         bytesToRead--;
@@ -138,7 +138,7 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
 
 int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
-    uart->write((const uint8_t*)dataToWrite, bytesToWrite);
+    uart_->write((const uint8_t*)dataToWrite, bytesToWrite);
     return bytesToWrite;
 }
 
