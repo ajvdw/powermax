@@ -14,7 +14,7 @@ namespace powermax {
 static const char *const TAG = "powermax";
 
 
-UARTDevice *uart_; 
+PowerMaxAlarm *pma_; 
 
 
 /*
@@ -112,19 +112,19 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
     {
         for(int ix=0; ix<10; ix++)
         {
-          if(uart_->available())
+          if(pma_->available())
           {
             break;
           }
           delay(5);
         }
         
-        if(uart_->available() == false)
+        if(pma_->available() == false)
         {
             break;
         }
 
-        *((char*)readBuff) = uart_->read();
+        *((char*)readBuff) = pma_->read();
         dwTotalRead ++;
         readBuff = ((char*)readBuff) + 1;
         bytesToRead--;
@@ -135,7 +135,7 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
 
 int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
-    uart_->write((const uint8_t*)dataToWrite, bytesToWrite);
+    pma_->write((const uint8_t*)dataToWrite, bytesToWrite);
     return bytesToWrite;
 }
 
