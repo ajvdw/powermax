@@ -14,6 +14,8 @@ namespace esphome {
 namespace mqtt {
 namespace powermax {
 
+#define PRINTF_BUF 512
+
 
 /** This class is a helper class for custom components that communicate using
  * MQTT. It has 5 helper functions that you can use (square brackets indicate optional):
