@@ -79,7 +79,7 @@ int log_console_setlogmask(int mask)
 
 void os_debugLog(int priority, bool raw, const char *function, int line, const char *format, ...)
 {
-  ESP_LOGD(TAG,format);
+  //ESP_LOGD(TAG,format);
   /*
   char buf[256];
   va_list ap;
@@ -103,8 +103,9 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
     case LOG_DEBUG
       ESP_LOGD(TAG,buf);
       break;
-      */
+    
   }
+  */
 
 }
 
