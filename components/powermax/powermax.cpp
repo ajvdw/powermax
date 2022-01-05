@@ -42,10 +42,10 @@ void PowerMaxAlarm::loop() {
 
 void sha1_pin( char in1, char in2, char *out)
 {
-  char tmp[25];
-  sprintf( tmp, "KorreltjeZout%02x#02x", in1, in2 );
+  //char tmp[25];
+  //sprintf( tmp, "KorreltjeZout%02x#02x", in1, in2 );
   //TODO String c = sha1(tmp);
-  sprintf( out, "%s", c.c_str() );  
+  //sprintf( out, "%s", c.c_str() );  
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
