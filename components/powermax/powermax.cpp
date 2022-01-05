@@ -56,7 +56,7 @@ void PowerMaxDevice::loop() {
 
 }
 
-void PowerMaxDevice::log( int prio, const char* buf) {
+void PowerMaxDevice::log( int priority, const char* buf) {
      switch( priority )
   {
     case LOG_EMERG:	
