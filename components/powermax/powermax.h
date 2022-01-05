@@ -42,10 +42,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
     //Variables for managing zones
     int zones_enrolled_count = MAX_ZONE_COUNT;
     int max_zone_id_enrolled = MAX_ZONE_COUNT;
-
-    void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID, int zone_or_system_update); 
-
-
+    
     virtual void OnStatusChange(const PlinkBuffer  * Buff)
     {
         //call base class implementation first, this will send ACK back and upate internal state.
