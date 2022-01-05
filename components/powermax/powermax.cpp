@@ -22,7 +22,6 @@ void PowerMaxDevice::loop() {
   static uint32_t lastMsg = 0;
   static uint32_t lastCmd = 0;
 
-
   //Handle incoming messages
   if( this->serial_handler_() )
     lastCmd = millis();
@@ -38,7 +37,10 @@ void PowerMaxDevice::loop() {
   {
     lastMsg = millis(); 
     std::string verbose_topic = App.get_name() + "/alarm/verbose_state";
-    this->publish(verbose_topic, this->GetVerboseState(), 0, true );
+    if( this->publish(verbose_topic, this->GetVerboseState(), 0, true ) )
+      ESP_LOGD(TAG,"Success sending MQTT verbose state message");
+    else 
+      ESP_LOGD(TAG,"Error sending MQTT verbose state message"); 
   }
 }
 
@@ -56,52 +58,51 @@ void PowerMaxDevice::on_message(const std::string &topic, const std::string &pay
     ESP.restart();
 }
 
- void PowerMaxDevice::mqtt_send(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID, int zone_or_system_update) {      
-      // Translate from pmax.cpp - PmaxLogEvents to hass MQTT accepted payloads.
-      ESP_LOGD(TAG,"Creating JSON string for MQTT");
-      //Build key JSON headers and structure  
-      if (zone_or_system_update == ALARM_STATE_CHANGE) {
-        //Here we have an alarm status change (zone 0) so put the status into JSON
-        std::string message_text;
-        message_text += "{\"stat_str\": \"";
-        message_text += ZoneOrEvent;
-        message_text += "\",\"stat_update_from\": \"";
-        message_text += WhoOrState;
-        message_text += "\"";
-        message_text += "}";
+void PowerMaxDevice::mqtt_send(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID, int zone_or_system_update) {      
+  // Translate from pmax.cpp - PmaxLogEvents to hass MQTT accepted payloads.
+  ESP_LOGD(TAG,"Creating JSON string for MQTT");
+  //Build key JSON headers and structure  
+  if (zone_or_system_update == ALARM_STATE_CHANGE) {
+    //Here we have an alarm status change (zone 0) so put the status into JSON
+    std::string message_text;
+    message_text += "{\"stat_str\": \"";
+    message_text += ZoneOrEvent;
+    message_text += "\",\"stat_update_from\": \"";
+    message_text += WhoOrState;
+    message_text += "\"";
+    message_text += "}";
 
-        //Send alarm state
-        std::string alarm_state_topic = App.get_name() + "/alarm/state";
-        if( this->publish(alarm_state_topic, message_text, 0, true ) )
-          ESP_LOGD(TAG,"Success sending MQTT message");
-        else 
-          ESP_LOGD(TAG,"Error sending MQTT message"); 
-      }
-      else if (zone_or_system_update == ZONE_STATE_CHANGE) {
-        //Convert zone ID to text
-        char zoneIDtext[10]; 
-        itoa(zoneID, zoneIDtext, 10);
+    //Send alarm state
+    std::string alarm_state_topic = App.get_name() + "/alarm/state";
+    if( this->publish(alarm_state_topic, message_text, 0, true ) )
+      ESP_LOGD(TAG,"Success sending MQTT alarm state message");
+    else 
+      ESP_LOGD(TAG,"Error sending MQTT alarm state message"); 
+  }
+  else if (zone_or_system_update == ZONE_STATE_CHANGE) {
+    //Convert zone ID to text
+    char zoneIDtext[10]; 
+    itoa(zoneID, zoneIDtext, 10);
 
-        //Here we have a zone status change so put this information into JSON
-        std::string message_text;
-        message_text += "{\"zone_id\": \"";
-        message_text +=  zoneIDtext;
-        message_text +=  "\",\"zone_name\": \"";
-        message_text +=  ZoneOrEvent;
-        message_text +=  "\",\"zone_status\": \"";
-        message_text +=  WhoOrState;
-        message_text +=  "\"";
-        message_text +=  "}";
-        
-        //Send zone state
-        std::string zone_state_topic = App.get_name() + "/zone/state/" + zoneIDtext;
-        if( this->publish(zone_state_topic, message_text, 0, true ) )
-          ESP_LOGD(TAG,"Success sending MQTT message");
-        else
-          ESP_LOGD(TAG,"Error sending MQTT message");  
-      }
-    }  
-
+    //Here we have a zone status change so put this information into JSON
+    std::string message_text;
+    message_text += "{\"zone_id\": \"";
+    message_text +=  zoneIDtext;
+    message_text +=  "\",\"zone_name\": \"";
+    message_text +=  ZoneOrEvent;
+    message_text +=  "\",\"zone_status\": \"";
+    message_text +=  WhoOrState;
+    message_text +=  "\"";
+    message_text +=  "}";
+    
+    //Send zone state
+    std::string zone_state_topic = App.get_name() + "/zone/state/" + zoneIDtext;
+    if( this->publish(zone_state_topic, message_text, 0, true ) )
+      ESP_LOGD(TAG,"Success sending MQTT zone state message");
+    else
+      ESP_LOGD(TAG,"Error sending MQTT zone state message");  
+  }
+}  
 
 void PowerMaxDevice::log( int priority, const char* buf) {
     switch( priority )
@@ -132,7 +133,6 @@ void PowerMaxDevice::log( int priority, const char* buf) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //This file contains OS specific implementation for ESP8266 used by PowerMax library
 //If you build for other platrorms (like Linux or Windows, don't include this file, but provide your own)
-
 int log_console_setlogmask(int mask) {
   static int lastmask; // To satisfy the library, logging level is set in yaml
   int oldmask = lastmask;
