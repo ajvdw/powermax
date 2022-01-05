@@ -7,6 +7,9 @@ namespace powermax {
 
 static const char *const TAG = "powermax";
 
+uint8_t DebugLevel; // To satisfy the compiler TODO
+uart::UARTComponent *uart; 
+
 /*
 void setup() {
    *     subscribe("the/topic", &MyCustomMQTTDevice::on_message);
@@ -27,7 +30,7 @@ void setup() {
 */
 void PowerMaxAlarm::setup() {
   ESP_LOGD(TAG, "Setup");
-
+  uart = (uart::UARTComponent *)this;
 }
 
 void PowerMaxAlarm::loop() {
@@ -111,7 +114,7 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
           delay(5);
         }
         
-        if(SERIALPORT.available() == false)
+        if(app.available() == false)
         {
             break;
         }
