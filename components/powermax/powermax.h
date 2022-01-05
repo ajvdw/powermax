@@ -35,6 +35,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
   void setup() override;
   void loop() override;
   void log(int prio, const char* buf);
+  void on_message(const std::string &topic, const std::string &payload);
 
 ////////////////////////////////////////////////
     bool zone_motion[MAX_ZONE_COUNT+1] = {0};
