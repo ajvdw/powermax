@@ -12,7 +12,6 @@
 
 namespace esphome {
 namespace mqtt {
-namespace uart {
 namespace powermax {
 
 #define PRINTF_BUF 512
@@ -26,7 +25,7 @@ namespace powermax {
  *  - `publish_json(topic, payload_builder, [qos], [retain])`
  *  - `is_connected()`
  */
-class PowerMaxAlarm : public mqtt::CustomMQTTDevice, public uart::UARTDevice, public Component {
+class PowerMaxAlarm : public uart::UARTDevice, public mqtt::CustomMQTTDevice, public Component {
  public:
 
   void setup() override;
@@ -35,7 +34,6 @@ class PowerMaxAlarm : public mqtt::CustomMQTTDevice, public uart::UARTDevice, pu
 };
 
 }  // namespace powermax
-}  // namespace uart
 }  // namespace mqtt
 }  // namespace esphome
 

@@ -1,7 +1,7 @@
-import esphome.codegen as cg
+   import esphome.codegen as cg
 import esphome.config_validation as cv
 
-from esphome.components import uart
+from esphome.components import uart, mqtt
 from esphome.const import (
     CONF_ID,
 )
@@ -13,7 +13,7 @@ DEPENDENCIES = ["uart"]
 
 CONF_POWERMAX_ID = "powermax_id"
 
-powermax_ns = cg.esphome_ns.namespace("esphome::mqtt::uart::powermax")
+powermax_ns = cg.esphome_ns.namespace("esphome::mqtt::powermax")
 PowerMaxAlarm = powermax_ns.class_("PowerMaxAlarm", uart.UARTDevice, cg.Component)
 
 POWERMAX_COMPONENT_SCHEMA = cv.COMPONENT_SCHEMA.extend(
@@ -37,3 +37,4 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
+
