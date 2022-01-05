@@ -80,11 +80,12 @@ int log_console_setlogmask(int mask)
 void os_debugLog(int priority, bool raw, const char *function, int line, const char *format, ...)
 {
   esphome::ESP_LOGD(TAG,"test");
-  /*
+ 
   char buf[256];
   va_list ap;
   vsnprintf(buf, sizeof(buf), format, ap);
   va_end(ap);
+ /*
   switch( priority )
   {
     case LOG_EMERG:	
