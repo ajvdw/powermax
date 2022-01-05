@@ -89,7 +89,7 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
   vsnprintf(buf, sizeof(buf), formt, ap);  
   va_end(ap);
 
-  global_pmd->log(priority, buf);
+  esphome::mqtt::powermax::global_pmd->log(priority, buf);
 
   switch( priority )
   {
