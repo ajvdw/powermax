@@ -28,7 +28,7 @@ void PowerMaxDevice::setup() {
   global_pmd = this;
   this->init();
   ESP_LOGD(TAG, "Setup");
-  mqtt::subscribe("alarm/command", &PowerMaxDevice::on_message);
+  this->subscribe("alarm/command", &PowerMaxDevice::on_message);
 }
 
 void PowerMaxDevice::loop() {
