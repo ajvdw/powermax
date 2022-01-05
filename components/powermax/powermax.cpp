@@ -31,10 +31,32 @@ void setup() {
 */
 void PowerMaxDevice::setup() {
   ESP_LOGD(TAG, "Setup");
+
   global_uart = (uart::UARTDevice *)this;
+
+  this->init();
 }
 
 void PowerMaxDevice::loop() {
+  
+  this->CheckInactivityTimers();
+
+  static u_int32_t lastMsg = 0;
+  if( this->serial_handler(pm) )
+  {
+    lastMsg = millis();
+  }
+
+  if(millis() - lastMsg > 300 || millis() < lastMsg) //we ensure a small delay between commands, as it can confuse the alarm (it has a slow CPU)
+  {
+    this->sendNextCommand();
+  }
+
+  if( this->restoreCommsIfLost()) //if we fail to get PINGs from the alarm - we will attempt to restore the connection
+  {
+      DEBUG(LOG_WARNING,"Connection lost. Sending RESTORE request.");   
+  }   
+
 }
 
 void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID, int zone_or_system_update) 
@@ -88,10 +110,10 @@ void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsi
     
     //Send zone state
 
-    char zoneStateTopic[100];
-    zoneStateTopic[0] = '\0';
-    strncpy(zoneStateTopic, hassmqttZoneStateTopic, 100);
-    strcat(zoneStateTopic, zoneIDtext);
+   // char zoneStateTopic[100];
+   // zoneStateTopic[0] = '\0';
+   // strncpy(zoneStateTopic, hassmqttZoneStateTopic, 100);
+   // strcat(zoneStateTopic, zoneIDtext);
     
    // TODO if (mqttClient.publish(zoneStateTopic, message_text, true) == true) {  // Send mqtt message and retain last known status and sends in sub topic with the zoneID.
    //    DEBUG(LOG_NOTICE,"Success sending MQTT message");

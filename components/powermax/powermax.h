@@ -55,26 +55,24 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         //Now send update to ST and use zone 0 as system state not zone 
         unsigned char zoneId = 0;
         
-        SendMQTTMessage(GetStrPmaxLogEvents(Buff->buffer[4]), GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
         arming = false;
         //now our customization:
 
-
-        //now our customization:
         switch(Buff->buffer[4])
         {
         case 0x51: //"Arm Home" 
         case 0x53: //"Quick Arm Home"
             //do something...
+            SendMQTTMessage("armed_home", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
             break;
 
         case 0x52: //"Arm Away"
         case 0x54: //"Quick Arm Away"
-            //do something...
+            SendMQTTMessage("armed_away", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
             break;
 
         case 0x55: //"Disarm"
-            //do someting...
+            SendMQTTMessage("disarmed", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
             break;
         }        
     }
@@ -125,7 +123,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         //zoneTripped    : specifies zone that initiated the alarm, values from PmaxEventSource
         //zoneTrippedStr : zone name
 
-        SendMQTTMessage("Triggered", zoneTrippedStr, 0, ALARM_STATE_CHANGE);
+        SendMQTTMessage("triggered", zoneTrippedStr, 0, ALARM_STATE_CHANGE);
 
     }
 
@@ -145,17 +143,17 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         switch(  this->stat )
         {
           case SS_Disarm: 
-            SendMQTTMessage( "Disarm", "", 0, ALARM_STATE_CHANGE);
+            SendMQTTMessage( "disarmed", "", 0, ALARM_STATE_CHANGE);
             break;
           case SS_Exit_Delay:
           case SS_Exit_Delay2:
-            SendMQTTMessage( "Arming", "", 0, ALARM_STATE_CHANGE);
+            SendMQTTMessage( "arming", "", 0, ALARM_STATE_CHANGE);
             break;
           case SS_Armed_Home: 
-            SendMQTTMessage( "Arm Home", "", 0, ALARM_STATE_CHANGE);
+            SendMQTTMessage( "armed_home", "", 0, ALARM_STATE_CHANGE);
             break;
           case SS_Armed_Away:
-            SendMQTTMessage( "Arm Away", "", 0, ALARM_STATE_CHANGE);
+            SendMQTTMessage( "armed_away", "", 0, ALARM_STATE_CHANGE);
             break;
           case SS_Entry_Delay:    
           case SS_User_Test:
@@ -183,6 +181,47 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         }
     }
 
+protected:
+  bool serial_handler_() {
+    bool packetHandled = false;
+    PlinkBuffer commandBuffer ;
+    memset(&commandBuffer, 0, sizeof(commandBuffer));
+    char oneByte = 0;  
+    while (  (os_pmComPortRead(&oneByte, 1) == 1)  ) 
+    {     
+      if (commandBuffer.size<(MAX_BUFFER_SIZE-1))
+      {
+        *(commandBuffer.size+commandBuffer.buffer) = oneByte;
+        commandBuffer.size++;
+      
+        if(oneByte == 0x0A) //postamble received, let's see if we have full message
+        {
+          if(PowerMaxAlarm::isBufferOK(&commandBuffer))
+          {
+            DEBUG(LOG_INFO,"--- new packet %d ----", millis());
+            packetHandled = true;
+            this->handlePacket(&commandBuffer);
+            commandBuffer.size = 0;
+            break;
+          }
+        }
+      }
+      else
+      {
+        DEBUG(LOG_WARNING,"Packet too big detected");
+      }
+    }
+
+    if(commandBuffer.size > 0)
+    {
+      packetHandled = true;
+      //this will be an invalid packet:
+      DEBUG(LOG_WARNING,"Passing invalid packet to packetManager");
+      this->handlePacket(&commandBuffer);
+    }
+
+    return packetHandled;
+  }
 
 };
 
