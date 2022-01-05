@@ -1,5 +1,6 @@
 #include "powermax.h"
 #include "esphome/core/log.h"
+#include "esphome/components/uart/uart_component.h"
 
 uint8_t DebugLevel; // To satisfy the compiler TODO
 
