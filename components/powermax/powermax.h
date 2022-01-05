@@ -11,12 +11,11 @@
 #include "pmax.h"
 
 namespace esphome {
+namespace uart {
 namespace mqtt {
 namespace powermax {
 
 #define PRINTF_BUF 512
-
-
 
 /** This class is a helper class for custom components that communicate using
  * MQTT. It has 5 helper functions that you can use (square brackets indicate optional):
@@ -37,5 +36,6 @@ class PowerMaxAlarm : public uart::UARTDevice, public mqtt::CustomMQTTDevice, pu
 
 }  // namespace powermax
 }  // namespace mqtt
+}  // namespace uart
 }  // namespace esphome
 
