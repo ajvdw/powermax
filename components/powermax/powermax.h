@@ -31,6 +31,41 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
   void setup() override;
   void loop() override;
 
+////////////////////////////////////////////////
+    bool zone_motion[MAX_ZONE_COUNT+1] = {0};
+    virtual void OnStatusChange(const PlinkBuffer  * Buff)
+    {
+        //call base class implementation first, this will send ACK back and upate internal state.
+        PowerMaxAlarm::OnStatusChange(Buff);
+
+
+        //Now send update to ST and use zone 0 as system state not zone 
+        unsigned char zoneId = 0;
+//SendMQTTMessage(GetStrPmaxLogEvents(Buff->buffer[4]), GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
+        arming = false;
+        //now our customization:
+
+
+        //now our customization:
+        switch(Buff->buffer[4])
+        {
+        case 0x51: //"Arm Home" 
+        case 0x53: //"Quick Arm Home"
+            //do something...
+            break;
+
+        case 0x52: //"Arm Away"
+        case 0x54: //"Quick Arm Away"
+            //do something...
+            break;
+
+        case 0x55: //"Disarm"
+            //do someting...
+            break;
+        }        
+    }
+
+
 };
 
 }  // namespace powermax
