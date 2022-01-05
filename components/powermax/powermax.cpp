@@ -55,6 +55,10 @@ void PowerMaxDevice::loop() {
 
 }
 
+void PowerMaxDevice::log( int prio, const char* buf) {
+    ESP_LOGD(TAG, "%s", buf);
+}
+
 }  // namespace powermax
 }  // namespace mqtt
 }  // namespace esphome

@@ -35,6 +35,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
 
   void setup() override;
   void loop() override;
+  void log(int prio, const char* buf);
 
 ////////////////////////////////////////////////
     bool zone_motion[MAX_ZONE_COUNT+1] = {0};
@@ -136,6 +137,8 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         //Canceled
         SendMQTTMessage("disarmed" , whoDisarmedStr, 0, ALARM_STATE_CHANGE);  
     }
+
+
 
     void SendAlarmState()
     {
