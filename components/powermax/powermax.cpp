@@ -79,9 +79,10 @@ int log_console_setlogmask(int mask)
 
 void os_debugLog(int priority, bool raw, const char *function, int line, const char *format, ...)
 {
+  char buf[256];
   va_list ap;
-  
-  va_start(ap, format);
+
+  vsnprintf(buf, sizeof(buf), format, ap)
 
   switch( priority )
   {
@@ -89,17 +90,17 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
     case LOG_ALERT:
     case LOG_CRIT:	
     case LOG_ERR:
-      ESP_LOGE(TAG, format, ap );
+      ESP_LOGE(TAG, buf );
       break;
     case LOG_WARNING:
-      ESP_LOGW(TAG, format, ap );
+      ESP_LOGW(TAG, buf );
       break;
     case LOG_NOTICE:
     case LOG_INFO:
-      ESP_LOGI(TAG, format, ap );
+      ESP_LOGI(TAG, buf );
       break;
     case LOG_DEBUG
-      ESP_LOGD(TAG, format, ap );
+      ESP_LOGD(TAG,buf );
       break;
   }
   va_end(ap);
