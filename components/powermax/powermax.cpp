@@ -4,11 +4,12 @@
 
 esphome::uart::UARTDevice *global_uart;
 
+static const char *const TAG = "powermax";
+
 namespace esphome {
 namespace mqtt {
 namespace powermax {
 
-static const char *const TAG = "powermax";
 
 /*
 void setup() {
