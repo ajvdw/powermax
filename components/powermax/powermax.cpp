@@ -8,13 +8,14 @@ uint8_t DebugLevel; // To satisfy the compiler TODO
 
 namespace esphome {
 namespace uart {
-
-UARTDevice *uart_; 
-
 namespace mqtt {
 namespace powermax {
 
 static const char *const TAG = "powermax";
+
+
+UARTDevice *uart_; 
+
 
 /*
 void setup() {
@@ -42,10 +43,6 @@ void PowerMaxAlarm::setup() {
 void PowerMaxAlarm::loop() {
 }
 
-}  // namespace powermax
-}  // namespace mqtt
-}  // namespace uart
-}  // namespace esphome
 
 void sha1_pin( char in1, char in2, char *out)
 {
@@ -166,3 +163,8 @@ bool os_getLocalTime(unsigned char& year, unsigned char& month, unsigned char& d
 {
     return false; //IZIZTODO
 }
+
+}  // namespace powermax
+}  // namespace mqtt
+}  // namespace uart
+}  // namespace esphome
