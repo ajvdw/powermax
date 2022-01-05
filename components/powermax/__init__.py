@@ -9,12 +9,12 @@ from esphome import pins
 
 CODEOWNERS = ["@ajvdw"]
 
-DEPENDENCIES = ["uart"]
+DEPENDENCIES = ["uart","mqtt"]
 
 CONF_POWERMAX_ID = "powermax_id"
 
 powermax_ns = cg.esphome_ns.namespace("esphome::uart::mqtt::powermax")
-PowerMaxAlarm = powermax_ns.class_("PowerMaxAlarm", uart.UARTDevice, mqtt.CustomMQTTDevice, cg.Component)
+PowerMaxAlarm = powermax_ns.class_("PowerMaxAlarm", uart.UARTDevice, cg.Component)
 
 POWERMAX_COMPONENT_SCHEMA = cv.COMPONENT_SCHEMA.extend(
     {
