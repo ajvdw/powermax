@@ -164,7 +164,8 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
 
 int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
-    global_uart->write_array((const uint8_t*)dataToWrite, bytesToWrite);
+    //global_uart->write_array((const uint8_t*)dataToWrite, bytesToWrite);
+    esphome::mqtt::powermax::global_pmd->write_array((const uint8_t*)dataToWrite, bytesToWrite);
     return bytesToWrite;
 }
 
