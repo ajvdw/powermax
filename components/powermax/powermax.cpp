@@ -74,9 +74,8 @@ void PowerMaxDevice::on_message(const std::string &topic, const std::string &pay
         std::string alarm_state_topic = App.get_name() + "/alarm/state";
         if( this->publish(alarm_state_topic, message_text, 0, true ) )
           ESP_LOGD(TAG,"Success sending MQTT message");
-        } else {
-          ESP_LOGD(TAG,"Error sending MQTT message");
-        }     
+        else 
+          ESP_LOGD(TAG,"Error sending MQTT message"); 
       }
       else if (zone_or_system_update == ZONE_STATE_CHANGE) {
         //Here we have a zone status change so put this information into JSON
@@ -99,9 +98,8 @@ void PowerMaxDevice::on_message(const std::string &topic, const std::string &pay
 
         if( this->publish(alarm_state_topic, message_text, 0, true ) )
           ESP_LOGD(TAG,"Success sending MQTT message");
-        } else {
-          ESP_LOGD(TAG,"Error sending MQTT message");
-        }  
+        else
+          ESP_LOGD(TAG,"Error sending MQTT message");  
       }
     }  
 
