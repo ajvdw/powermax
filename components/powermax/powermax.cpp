@@ -96,7 +96,7 @@ void PowerMaxDevice::on_message(const std::string &topic, const std::string &pay
         itoa(zoneID, zoneIDtext, 10);
         zone_state_topic += zoneIDtext;
 
-        if( this->publish(alarm_state_topic, message_text, 0, true ) )
+        if( this->publish(zone_state_topic, message_text, 0, true ) )
           ESP_LOGD(TAG,"Success sending MQTT message");
         else
           ESP_LOGD(TAG,"Error sending MQTT message");  
