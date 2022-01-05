@@ -1,7 +1,6 @@
 #include "powermax.h"
 #include "esphome/core/log.h"
 
-uint8_t DebugLevel; // To satisfy the compiler TODO
 
 esphome::uart::UARTDevice *global_uart;
 
@@ -56,9 +55,6 @@ void PowerMaxDevice::loop() {
 
 }
 
-
-
-
 }  // namespace powermax
 }  // namespace mqtt
 }  // namespace esphome
@@ -69,10 +65,13 @@ void PowerMaxDevice::loop() {
 
 int log_console_setlogmask(int mask)
 {
-  int oldmask = DebugLevel;
+  static int lastmask; // To satisfy the library, logging level is set in yaml
+
+  int oldmask = lastmask;
   if(mask == 0)
     return oldmask; /* POSIX definition for 0 mask */
-  DebugLevel = mask;
+  lastmask = mask;
+
   return oldmask;
 } 
 
@@ -85,11 +84,28 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
     va_list ap;
     
     va_start(ap, format);
-    vsnprintf(buf, sizeof(buf), format, ap);
-    
-    va_end(ap);
-  
-    yield();
+
+    switch( priority )
+    {
+      case; 
+      #ifndef LOG_INFO
+      case LOG_EMERG:	
+      case LOG_ALERT:
+      case LOG_CRIT:	
+      case LOG_ERR:
+        ESP_LOGE(TAG, format, ap );
+        break;
+      case LOG_WARNING:
+        ESP_LOGW(TAG, format, ap );
+        break;
+      case LOG_NOTICE:
+      case LOG_INFO:
+        ESP_LOGI(TAG, format, ap );
+        break;
+      case LOG_DEBUG
+        ESP_LOGD(TAG, format, ap );
+        break;
+    }
   }
 }
 
