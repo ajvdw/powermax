@@ -28,7 +28,10 @@ void PowerMaxDevice::setup() {
   global_pmd = this;
   this->init();
   ESP_LOGD(TAG, "Setup");
-  this->subscribe("alarm/input", &PowerMaxDevice::on_message);
+
+  std::string command_topic = App.get_name() + std:string("/input");
+  this->subscribe( command_topic, &PowerMaxDevice::on_message);
+  ESP_LOGD(TAG, "MQTT subscribed to %s", command_topic.c_str());
 }
 
 void PowerMaxDevice::loop() {
@@ -49,9 +52,6 @@ void PowerMaxDevice::loop() {
 void PowerMaxDevice::on_message(const std::string &topic, const std::string &payload) {
   // do something with topic and payload
   ESP_LOGD(TAG,"Payload %s on topic %s received",payload.c_str(), topic.c_str());
-  ESP_LOGD(TAG,"Prefix %s", App.get_name().c_str() );
-      //  const std::string &node_name = App.get_name();
-       // std::string unique_id = this->unique_id();
 
   if (payload=="DISARM")
     this->sendCommand(Pmax_DISARM);  
