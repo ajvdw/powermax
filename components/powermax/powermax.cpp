@@ -3,13 +3,13 @@
 
 
 esphome::uart::UARTDevice *global_uart;
-PowerMaxDevice *global_pmd;
+
 
 namespace esphome {
 namespace mqtt {
 namespace powermax {
 
-
+PowerMaxDevice *global_pmd;
 /*
 void setup() {
    *     subscribe("the/topic", &MyCustomMQTTDevice::on_message);
