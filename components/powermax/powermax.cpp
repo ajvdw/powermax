@@ -57,7 +57,25 @@ void PowerMaxDevice::loop() {
 }
 
 void PowerMaxDevice::log( int prio, const char* buf) {
-    ESP_LOGD(TAG, "%s", buf);
+     switch( priority )
+  {
+    case LOG_EMERG:	
+    case LOG_ALERT:
+    case LOG_CRIT:	
+    case LOG_ERR:
+      ESP_LOGE(TAG,"%s",buf);
+      break;
+    case LOG_WARNING:
+      ESP_LOGW(TAG,"%s",buf);
+      break;
+    case LOG_NOTICE:
+    case LOG_INFO:
+      ESP_LOGI(TAG,"%s",buf);
+      break;
+    case LOG_DEBUG:
+      ESP_LOGD(TAG,"%s",buf);
+      break;
+  }    
 }
 
 }  // namespace powermax
@@ -90,26 +108,7 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
   va_end(ap);
 
   esphome::mqtt::powermax::global_pmd->log(priority, buf);
-
-  switch( priority )
-  {
-    case LOG_EMERG:	
-    case LOG_ALERT:
-    case LOG_CRIT:	
-    case LOG_ERR:
-  //    esphome::ESP_LOGE(TAG,"%s",buf);
-      break;
-    case LOG_WARNING:
-   //   esphome::ESP_LOGW(TAG,"%s",buf);
-      break;
-    case LOG_NOTICE:
-    case LOG_INFO:
-    //  esphome::ESP_LOGI(TAG,"%s",buf);
-      break;
-    case LOG_DEBUG
-    //  esphome::ESP_LOGD(TAG,"%s",buf);
-      break;
-  }         
+     
 }
 
 void os_usleep(int microseconds)
