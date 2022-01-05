@@ -28,7 +28,7 @@ void PowerMaxDevice::setup() {
   global_pmd = this;
   this->init();
   ESP_LOGD(TAG, "Setup");
-  this->subscribe("/alarm/command", &PowerMaxDevice::on_message);
+  this->subscribe("alarm/input", &PowerMaxDevice::on_message);
 }
 
 void PowerMaxDevice::loop() {
@@ -48,6 +48,8 @@ void PowerMaxDevice::loop() {
 
 void PowerMaxDevice::on_message(const std::string &topic, const std::string &payload) {
   // do something with topic and payload
+  SP_LOGD(TAG,"Payload %s on topic %s received",payload.c_str(), topic.c_str());
+
   if (payload=="DISARM")
     this->sendCommand(Pmax_DISARM);  
   else if (payload=="ARM_HOME")
