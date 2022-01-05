@@ -3,7 +3,7 @@
 
 uint8_t DebugLevel; // To satisfy the compiler TODO
 
-UARTComponent *uart; 
+UARTComponent *uart_; 
 
 namespace esphome {
 namespace mqtt {
@@ -31,7 +31,7 @@ void setup() {
 */
 void PowerMaxAlarm::setup() {
   ESP_LOGD(TAG, "Setup");
-  uart = (uart::UARTComponent *)this;
+  uart_ = (uart::UARTComponent *)this;
 }
 
 void PowerMaxAlarm::loop() {
