@@ -87,8 +87,6 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
 
     switch( priority )
     {
-      case; 
-      #ifndef LOG_INFO
       case LOG_EMERG:	
       case LOG_ALERT:
       case LOG_CRIT:	
