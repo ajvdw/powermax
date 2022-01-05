@@ -48,13 +48,13 @@ void PowerMaxDevice::loop() {
 
 void PowerMaxDevice::on_message(const std::string &topic, const std::string &payload) {
   // do something with topic and payload
-  if (alarm_command=="DISARM")
+  if (payload=="DISARM")
     this->sendCommand(Pmax_DISARM);  
-  else if (alarm_command=="ARM_HOME")
+  else if (payload=="ARM_HOME")
     this->sendCommand(Pmax_ARMHOME);
-  else if (alarm_command=="ARM_AWAY")
+  else if (payload=="ARM_AWAY")
     this->sendCommand(Pmax_ARMAWAY);  
-  else if (alarm_command=="*REBOOT*")
+  else if (payload=="*REBOOT*")
     ESP.restart();
 }
 
