@@ -46,7 +46,7 @@ void PowerMaxDevice::loop() {
   }
 }
 
-void on_message(const std::string &topic, const std::string &payload) {
+void PowerMaxDevice::on_message(const std::string &topic, const std::string &payload) {
   // do something with topic and payload
   if (alarm_command=="DISARM")
     this->sendCommand(Pmax_DISARM);  
