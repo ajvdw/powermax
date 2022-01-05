@@ -11,8 +11,8 @@
 #include "pmax.h"
 
 namespace esphome {
-namespace uart {
 namespace mqtt {
+namespace uart {
 namespace powermax {
 
 #define PRINTF_BUF 512
@@ -35,7 +35,7 @@ class PowerMaxAlarm : public UARTDevice, public CustomMQTTDevice, public Compone
 };
 
 }  // namespace powermax
-}  // namespace mqtt
 }  // namespace uart
+}  // namespace mqtt
 }  // namespace esphome
 

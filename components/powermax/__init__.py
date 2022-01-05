@@ -13,7 +13,7 @@ DEPENDENCIES = ["uart"]
 
 CONF_POWERMAX_ID = "powermax_id"
 
-powermax_ns = cg.esphome_ns.namespace("esphome::uart::powermax")
+powermax_ns = cg.esphome_ns.namespace("esphome::mqtt::uart::powermax")
 PowerMaxAlarm = powermax_ns.class_("PowerMaxAlarm", uart.UARTDevice, cg.Component)
 
 POWERMAX_COMPONENT_SCHEMA = cv.COMPONENT_SCHEMA.extend(

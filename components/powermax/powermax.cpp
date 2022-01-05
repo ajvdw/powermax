@@ -7,8 +7,8 @@ uint8_t DebugLevel; // To satisfy the compiler TODO
 
 
 namespace esphome {
-namespace uart {
 namespace mqtt {
+namespace uart {
 namespace powermax {
 
 static const char *const TAG = "powermax";
@@ -165,6 +165,6 @@ bool os_getLocalTime(unsigned char& year, unsigned char& month, unsigned char& d
 }
 
 }  // namespace powermax
-}  // namespace mqtt
 }  // namespace uart
+}  // namespace mqtt
 }  // namespace esphome
