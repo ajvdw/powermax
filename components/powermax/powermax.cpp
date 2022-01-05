@@ -3,13 +3,15 @@
 
 uint8_t DebugLevel; // To satisfy the compiler TODO
 
+uart::UARTDevice *global_uart;
+
 namespace esphome {
 namespace mqtt {
 namespace powermax {
 
 static const char *const TAG = "powermax";
 
-uart::UARTDevice *uart_;
+
 
 /*
 void setup() {
@@ -31,19 +33,10 @@ void setup() {
 */
 void PowerMaxAlarm::setup() {
   ESP_LOGD(TAG, "Setup");
-  uart_ = (uart::UARTDevice *)this;
+  global_uart = (uart::UARTDevice *)this;
 }
 
 void PowerMaxAlarm::loop() {
-}
-
-
-void sha1_pin( char in1, char in2, char *out)
-{
-  //char tmp[25];
-  //sprintf( tmp, "KorreltjeZout%02x#02x", in1, in2 );
-  //TODO String c = sha1(tmp);
-  //sprintf( out, "%s", c.c_str() );  
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,19 +99,19 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
     {
         for(int ix=0; ix<10; ix++)
         {
-          if(uart_->available())
+          if(global_uart->available())
           {
             break;
           }
           delay(5);
         }
         
-        if(uart_->available() == false)
+        if(global_uart->available() == false)
         {
             break;
         }
 
-        *((char*)readBuff) = uart_->read();
+        *((char*)readBuff) = global_uart->read();
         dwTotalRead ++;
         readBuff = ((char*)readBuff) + 1;
         bytesToRead--;
@@ -129,7 +122,7 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
 
 int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
-    uart_->write_array((const uint8_t*)dataToWrite, bytesToWrite);
+    global_uart->write_array((const uint8_t*)dataToWrite, bytesToWrite);
     return bytesToWrite;
 }
 
