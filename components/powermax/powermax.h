@@ -10,11 +10,12 @@
 
 #include "pmax.h"
 
+static const char *const TAG = "powermax";
+
+
 namespace esphome {
 namespace mqtt {
 namespace powermax {
-
-#define TAG "PowerMax"
 
 #define ALARM_STATE_CHANGE 0
 #define ZONE_STATE_CHANGE 1
