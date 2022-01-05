@@ -48,7 +48,7 @@ void PowerMaxDevice::loop() {
 
 void PowerMaxDevice::on_message(const std::string &topic, const std::string &payload) {
   // do something with topic and payload
-  SP_LOGD(TAG,"Payload %s on topic %s received",payload.c_str(), topic.c_str());
+  ESP_LOGD(TAG,"Payload %s on topic %s received",payload.c_str(), topic.c_str());
 
   if (payload=="DISARM")
     this->sendCommand(Pmax_DISARM);  
