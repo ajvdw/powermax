@@ -39,6 +39,11 @@ void PowerMaxAlarm::setup() {
 void PowerMaxAlarm::loop() {
 }
 
+
+}  // namespace powermax
+}  // namespace mqtt
+}  // namespace esphome
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //This file contains OS specific implementation for ESP8266 used by PowerMax library
 //If you build for other platrorms (like Linux or Windows, don't include this file, but provide your own)
@@ -151,6 +156,3 @@ bool os_getLocalTime(unsigned char& year, unsigned char& month, unsigned char& d
     return false; //IZIZTODO
 }
 
-}  // namespace powermax
-}  // namespace mqtt
-}  // namespace esphome
