@@ -108,19 +108,19 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
     {
         for(int ix=0; ix<10; ix++)
         {
-          if(SERIALPORT.available())
+          if(uart->available())
           {
             break;
           }
           delay(5);
         }
         
-        if(app.available() == false)
+        if(uart->available() == false)
         {
             break;
         }
 
-        *((char*)readBuff) = SERIALPORT.read();
+        *((char*)readBuff) = uart->read();
         dwTotalRead ++;
         readBuff = ((char*)readBuff) + 1;
         bytesToRead--;
@@ -131,7 +131,7 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
 
 int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
-    SERIALPORT.write((const uint8_t*)dataToWrite, bytesToWrite);
+    uart->write((const uint8_t*)dataToWrite, bytesToWrite);
     return bytesToWrite;
 }
 
