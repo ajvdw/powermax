@@ -84,7 +84,7 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
   vsnprintf(buf, sizeof(buf), formt, ap);  
   va_end(ap);
 
-  switch( prio )
+  switch( priority )
   {
     case LOG_EMERG:	
     case LOG_ALERT:
