@@ -69,7 +69,7 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
     va_end(ap);
   
     yield();
-    }
+  }
 }
 
 void os_usleep(int microseconds)
