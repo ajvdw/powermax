@@ -4,7 +4,7 @@
 
 esphome::uart::UARTDevice *global_uart;
 
-
+static const char *const TAG = "powermax";
 
 namespace esphome {
 namespace mqtt {
@@ -81,9 +81,8 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
 {
   char buf[256];
   va_list ap;
-
   vsnprintf(buf, sizeof(buf), format, ap);
-
+  va_end(ap);
   switch( priority )
   {
     case LOG_EMERG:	
@@ -103,7 +102,7 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
       ESP_LOGD(TAG,buf );
       break;
   }
-  va_end(ap);
+
 }
 
 void os_usleep(int microseconds)

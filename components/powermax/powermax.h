@@ -14,7 +14,7 @@ namespace esphome {
 namespace mqtt {
 namespace powermax {
 
-#define TAG "powermax"
+
 #define ALARM_STATE_CHANGE 0
 #define ZONE_STATE_CHANGE 1
 
@@ -42,7 +42,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
     //Variables for managing zones
     int zones_enrolled_count = MAX_ZONE_COUNT;
     int max_zone_id_enrolled = MAX_ZONE_COUNT;
-
+    
     virtual void OnStatusChange(const PlinkBuffer  * Buff)
     {
         //call base class implementation first, this will send ACK back and upate internal state.
