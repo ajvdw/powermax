@@ -3,7 +3,7 @@
 
 
 esphome::uart::UARTDevice *global_uart;
-
+PowerMaxDevice *global_pmd;
 
 namespace esphome {
 namespace mqtt {
@@ -32,6 +32,7 @@ void PowerMaxDevice::setup() {
   ESP_LOGD(TAG, "Setup");
 
   global_uart = (uart::UARTDevice *)this;
+  global_pmd = this;
 
   this->init();
 }
@@ -88,7 +89,7 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
   vsnprintf(buf, sizeof(buf), formt, ap);  
   va_end(ap);
 
-  ESP_LOGE(TAG,"%s",buf);
+  global_pmd->log(priority, buf);
 
   switch( priority )
   {
