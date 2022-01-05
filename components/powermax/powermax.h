@@ -12,7 +12,6 @@
 
 static const char *const TAG = "powermax";
 
-
 namespace esphome {
 namespace mqtt {
 namespace powermax {
@@ -50,8 +49,6 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
     {
         //call base class implementation first, this will send ACK back and upate internal state.
         PowerMaxAlarm::OnStatusChange(Buff);
-
-
         //Now send update to ST and use zone 0 as system state not zone 
         unsigned char zoneId = 0;
         
@@ -76,6 +73,7 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
             break;
         }        
     }
+
     const char* getZoneSensorType(unsigned char zoneId)
     {
         if(zoneId < MAX_ZONE_COUNT &&
@@ -86,8 +84,6 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         return "Unknown";
     }
  
-
-
     virtual void OnStatusUpdatePanel(const PlinkBuffer  * Buff)
     {
         //call base class implementation first, to log the event and update states.
@@ -138,8 +134,6 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         SendMQTTMessage("disarmed" , whoDisarmedStr, 0, ALARM_STATE_CHANGE);  
     }
 
-
-
     void SendAlarmState()
     {
         switch(  this->stat )
@@ -172,8 +166,6 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
         }
     }
     
-
-
     void CheckInactivityTimers() {
         for(int ix=1; ix<=max_zone_id_enrolled; ix++) {
             if (zone_motion[ix]) {
@@ -186,24 +178,17 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
     }
 
   void SendMQTTMessage(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID, int zone_or_system_update) {
-
-      //SERIALPORT.println("MQTT Message initialized");
       char message_text[600];
       message_text[0] = '\0';
 
       //Convert zone ID to text
       char zoneIDtext[10];
       itoa(zoneID, zoneIDtext, 10);
-
       
       // Translate from pmax.cpp - PmaxLogEvents to hass MQTT accepted payloads.
-
-
-      DEBUG(LOG_NOTICE,"Creating JSON string for MQTT");
+      ESP_LOGD(TAG,"Creating JSON string for MQTT");
       //Build key JSON headers and structure  
       if (zone_or_system_update == ALARM_STATE_CHANGE) {
-        
-
         //Here we have an alarm status change (zone 0) so put the status into JSON
         strncpy(message_text, "{\r\n\"stat_str\": \"", 600);
         strcat(message_text, ZoneOrEvent);
@@ -215,9 +200,9 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
       
 
       // TODO if (mqttClient.publish(mqttAlarmStateTopic, ZoneOrEvent, true) == true) {  // Send translated mqtt message and retain last known status
-      //     DEBUG(LOG_NOTICE,"Success sending MQTT message");
+      //     ESP_LOGD(TAG,"Success sending MQTT message");
       //    } else {
-      //     DEBUG(LOG_NOTICE,"Error sending MQTT message");
+      //     ESP_LOGD(TAG,"Error sending MQTT message");
       //    }   
           
 
@@ -241,9 +226,9 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
       // strcat(zoneStateTopic, zoneIDtext);
         
       // TODO if (mqttClient.publish(zoneStateTopic, message_text, true) == true) {  // Send mqtt message and retain last known status and sends in sub topic with the zoneID.
-      //    DEBUG(LOG_NOTICE,"Success sending MQTT message");
+      //    ESP_LOGD(TAG,"Success sending MQTT message");
       //   } else {
-      //   DEBUG(LOG_NOTICE,"Error sending MQTT message");
+      //   ESP_LOGD(TAG,"Error sending MQTT message");
       //   }  
       }
     
@@ -266,7 +251,7 @@ protected:
         {
           if(PowerMaxAlarm::isBufferOK(&commandBuffer))
           {
-            DEBUG(LOG_INFO,"--- new packet %d ----", millis());
+            ESP_LOGD(TAG,"--- new packet %d ----", millis());
             packetHandled = true;
             this->handlePacket(&commandBuffer);
             commandBuffer.size = 0;
@@ -276,7 +261,7 @@ protected:
       }
       else
       {
-        DEBUG(LOG_WARNING,"Packet too big detected");
+        ESP_LOGW(TAG,"Packet too big detected");
       }
     }
 
@@ -284,13 +269,11 @@ protected:
     {
       packetHandled = true;
       //this will be an invalid packet:
-      DEBUG(LOG_WARNING,"Passing invalid packet to packetManager");
+      ESP_LOGW(TAG,"Passing invalid packet to packetManager");
       this->handlePacket(&commandBuffer);
     }
-
     return packetHandled;
   }
-
 };
 
 }  // namespace powermax

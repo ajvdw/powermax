@@ -1,9 +1,6 @@
 #include "powermax.h"
 #include "esphome/core/log.h"
 
-
-esphome::uart::UARTDevice *global_uart;
-
 namespace esphome {
 namespace mqtt {
 namespace powermax {
@@ -28,54 +25,59 @@ void setup() {
    *   }
 */
 void PowerMaxDevice::setup() {
-  ESP_LOGD(TAG, "Setup");
-
-  global_uart = (uart::UARTDevice *)this;
   global_pmd = this;
-
   this->init();
+  ESP_LOGD(TAG, "Setup");
+  mqtt::subscribe("alarm/command", &PowerMaxDevice::on_message);
 }
 
 void PowerMaxDevice::loop() {
-
   this->CheckInactivityTimers();
-
   static uint32_t lastMsg = 0;
-
   //Handle incoming messages
   if( this->serial_handler_() )
     lastMsg = millis();
-
   //we ensure a small delay between commands, as it can confuse the alarm (it has a slow CPU)
   if(millis() - lastMsg > 300 || millis() < lastMsg) 
     this->sendNextCommand();
-
   if( this->restoreCommsIfLost()) //if we fail to get PINGs from the alarm - we will attempt to restore the connection
-  {
-      DEBUG(LOG_WARNING,"Connection lost. Sending RESTORE request.");   
+  {  
+    ESP_LOGW(TAG,"Connection lost. Sending RESTORE request.");   
   }
 }
 
+void on_message(const std::string &topic, const std::string &payload) {
+  // do something with topic and payload
+  if (alarm_command=="DISARM")
+    this->sendCommand(Pmax_DISARM);  
+  else if (alarm_command=="ARM_HOME")
+    this->sendCommand(Pmax_ARMHOME);
+  else if (alarm_command=="ARM_AWAY")
+    this->sendCommand(Pmax_ARMAWAY);  
+  else if (alarm_command=="*REBOOT*")
+    ESP.restart();
+}
+
 void PowerMaxDevice::log( int priority, const char* buf) {
-     switch( priority )
-  {
-    case LOG_EMERG:	
-    case LOG_ALERT:
-    case LOG_CRIT:	
-    case LOG_ERR:
-      ESP_LOGE(TAG,"%s",buf);
-      break;
-    case LOG_WARNING:
-      ESP_LOGW(TAG,"%s",buf);
-      break;
-    case LOG_NOTICE:
-    case LOG_INFO:
-      ESP_LOGI(TAG,"%s",buf);
-      break;
-    case LOG_DEBUG:
-      ESP_LOGD(TAG,"%s",buf);
-      break;
-  }    
+    switch( priority )
+    {
+      case LOG_EMERG:	
+      case LOG_ALERT:
+      case LOG_CRIT:	
+      case LOG_ERR:
+        ESP_LOGE(TAG,"%s",buf);
+        break;
+      case LOG_WARNING:
+        ESP_LOGW(TAG,"%s",buf);
+        break;
+      case LOG_NOTICE:
+      case LOG_INFO:
+        ESP_LOGI(TAG,"%s",buf);
+        break;
+      case LOG_DEBUG:
+        ESP_LOGD(TAG,"%s",buf);
+        break;
+    }    
 }
 
 }  // namespace powermax
@@ -89,26 +91,21 @@ void PowerMaxDevice::log( int priority, const char* buf) {
 int log_console_setlogmask(int mask)
 {
   static int lastmask; // To satisfy the library, logging level is set in yaml
-
   int oldmask = lastmask;
   if(mask == 0)
     return oldmask; /* POSIX definition for 0 mask */
   lastmask = mask;
-
   return oldmask;
 } 
 
 void os_debugLog(int priority, bool raw, const char *function, int line, const char *formt, ...)
 { 
-
   char buf[256];
   va_list ap;
   va_start(ap, formt);
   vsnprintf(buf, sizeof(buf), formt, ap);  
   va_end(ap);
-
-  esphome::mqtt::powermax::global_pmd->log(priority, buf);
-     
+  esphome::mqtt::powermax::global_pmd->log(priority, buf);   
 }
 
 void os_usleep(int microseconds)
@@ -141,19 +138,19 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
     {
         for(int ix=0; ix<10; ix++)
         {
-          if(global_uart->available())
+          if(esphome::mqtt::powermax::global_pmd->->available())
           {
             break;
           }
           delay(5);
         }
         
-        if(global_uart->available() == false)
+        if(esphome::mqtt::powermax::global_pmd->->available() == false)
         {
             break;
         }
 
-        *((char*)readBuff) = global_uart->read();
+        *((char*)readBuff) = esphome::mqtt::powermax::global_pmd->->read();
         dwTotalRead ++;
         readBuff = ((char*)readBuff) + 1;
         bytesToRead--;
@@ -164,8 +161,8 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
 
 int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
-    //global_uart->write_array((const uint8_t*)dataToWrite, bytesToWrite);
-    (uart::UARTDevice *)esphome::mqtt::powermax::global_pmd->write_array((const uint8_t*)dataToWrite, bytesToWrite);
+    // Write to Serial
+    esphome::mqtt::powermax::global_pmd->write_array((const uint8_t*)dataToWrite, bytesToWrite);
     return bytesToWrite;
 }
 
