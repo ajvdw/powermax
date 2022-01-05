@@ -76,16 +76,15 @@ int log_console_setlogmask(int mask)
   return oldmask;
 } 
 
-template <class ... Args>
-void os_debugLog(int priority, bool raw, const char *function, int line, const char *format, Args ... args)
-{
- 
-//  char buf[256];
-//  va_list ap;
-//  vsnprintf(buf, sizeof(buf), format, ap);
-//  va_end(ap);
+void os_debugLog(int priority, bool raw, const char *function, int line, const char *format, ...)
+{ 
+ /*
+  char buf[256];
+  va_list ap;
+  vsnprintf(buf, sizeof(buf), format, ap);
+*/
 
-  esphome::ESP_LOGD(TAG, format, args...);
+  esphome::ESP_LOGD(TAG,format, ... );
 
  /*
   switch( priority )
