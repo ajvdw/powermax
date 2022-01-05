@@ -29,7 +29,7 @@ void PowerMaxDevice::setup() {
   this->init();
   ESP_LOGD(TAG, "Setup");
 
-  std::string command_topic = App.get_name() + std:string("/input");
+  std::string command_topic = App.get_name() + std::string("/input");
   this->subscribe( command_topic, &PowerMaxDevice::on_message);
   ESP_LOGD(TAG, "MQTT subscribed to %s", command_topic.c_str());
 }
