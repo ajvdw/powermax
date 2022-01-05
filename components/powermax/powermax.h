@@ -191,11 +191,11 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
 
         //Here we have an alarm status change (zone 0) so put the status into JSON
         message_text += "{\"stat_str\": \"";
-        message_text += ZoneOrEvent);
-        message_text += "\",\"stat_update_from\": \"");
-        message_text += WhoOrState);
-        message_text += "\"");
-        message_text += "}");
+        message_text += ZoneOrEvent;
+        message_text += "\",\"stat_update_from\": \"";
+        message_text += WhoOrState;
+        message_text += "\"";
+        message_text += "}";
         //Send alarm state
       
 
@@ -213,14 +213,14 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
       else if (zone_or_system_update == ZONE_STATE_CHANGE) {
         //Here we have a zone status change so put this information into JSON
         std::string message_text;
-        message_text += "{\"zone_id\": \"" );
-        message_text +=  zoneIDtext);
-        message_text +=  "\",\"zone_name\": \"");
-        message_text +=  ZoneOrEvent);
-        message_text +=  "\",\"zone_status\": \"");
-        message_text +=  WhoOrState);
-        message_text +=  "\"");
-        message_text +=  "}");
+        message_text += "{\"zone_id\": \"";
+        message_text +=  zoneIDtext;
+        message_text +=  "\",\"zone_name\": \"";
+        message_text +=  ZoneOrEvent;
+        message_text +=  "\",\"zone_status\": \"";
+        message_text +=  WhoOrState;
+        message_text +=  "\"";
+        message_text +=  "}";
         
         //Send zone state
 
