@@ -84,10 +84,25 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
   vsnprintf(buf, sizeof(buf), formt, ap);  
   va_end(ap);
 
-  //esphome::ESP_LOGE( TAG, LOG_STR((const char*)buf) );
-
- 
-
+  switch( prio )
+  {
+    case LOG_EMERG:	
+    case LOG_ALERT:
+    case LOG_CRIT:	
+    case LOG_ERR:
+      esphome::ESP_LOGE(TAG,"%s",buf);
+      break;
+    case LOG_WARNING:
+      esphome::ESP_LOGW(TAG,"%s",buf);
+      break;
+    case LOG_NOTICE:
+    case LOG_INFO:
+      esphome::ESP_LOGI(TAG,"%s",buf);
+      break;
+    case LOG_DEBUG
+      esphome::ESP_LOGD(TAG,"%s",buf);
+      break;
+  }         
 }
 
 void os_usleep(int microseconds)
