@@ -287,6 +287,8 @@ protected:
       DEBUG(LOG_WARNING,"Passing invalid packet to packetManager");
       this->handlePacket(&commandBuffer);
     }
+    else
+      DEBUG(LOG_DEBUG,"No data?");
 
     return packetHandled;
   }
