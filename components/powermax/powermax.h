@@ -7,7 +7,7 @@
 #include "esphome/core/defines.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
-#include <lib/pmax.h>
+#include "pmax.h"
 
 static const char* const TAG = "powermax";
 
