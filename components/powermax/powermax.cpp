@@ -115,7 +115,8 @@ void PowerMaxDevice::mqtt_send(const char* ZoneOrEvent, const char* WhoOrState, 
       ESP_LOGD(TAG, "Success sending MQTT alarm state message");
     else
       ESP_LOGD(TAG, "Error sending MQTT alarm state message");
-  } else if (zone_or_system_update == ZONE_STATE_CHANGE) {
+  } 
+  else if (zone_or_system_update == ZONE_STATE_CHANGE) {
     // Convert zone ID to text
     char zoneIDtext[10];
     itoa(zoneID, zoneIDtext, 10);
