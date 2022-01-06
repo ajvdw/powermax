@@ -245,7 +245,6 @@ void PowerMaxDevice::OnAlarmStarted(unsigned char alarmType, const char* alarmTy
   // alarmTypeStr   : text representation of alarmType
   // zoneTripped    : specifies zone that initiated the alarm, values from
   // PmaxEventSource zoneTrippedStr : zone name
-
   mqtt_send_("triggered", zoneTrippedStr, 0, ALARM_STATE_CHANGE);
 }
 
