@@ -13,7 +13,7 @@ void PowerMaxDevice::setup() {
   ESP_LOGD(TAG, "Setup");
 
   std::string command_topic = App.get_name() + std::string("/alarm/input");
-  this->subscribe( command_topic, &PowerMaxDevice::on_message);
+  this->subscribe( command_topic, &PowerMaxDevice::on_mqtt_receive);
   ESP_LOGD(TAG, "MQTT subscribed to %s", command_topic.c_str());
 }
 
@@ -22,16 +22,24 @@ void PowerMaxDevice::loop() {
   static uint32_t lastMsg = 0;
   static uint32_t lastCmd = 0;
 
+  //Check Inactivity Timers
+  for(int ix=1; ix<=max_zone_id_enrolled; ix++) {
+      if (zone_motion[ix]) {
+          if ((os_getCurrentTimeSec() - zone[ix].lastEventTime) > inactivity_seconds) {
+              zone_motion[ix]= false;
+              mqtt_send(this->getZoneName(ix), "No Motion", ix, ZONE_STATE_CHANGE);  
+          }
+      }
+  }
+
   //Handle incoming messages
-  if( this->serial_handler_() )
+  if( this->process_messsages() )
     lastCmd = millis();
   //we ensure a small delay between commands, as it can confuse the alarm (it has a slow CPU)
   if(millis() - lastCmd > 300 || millis() < lastCmd) 
     this->sendNextCommand();
-  if( this->restoreCommsIfLost()) //if we fail to get PINGs from the alarm - we will attempt to restore the connection
-  {  
+  if( this->restoreCommsIfLost()) //if we fail to get PINGs from the alarm - we will attempt to restore the connection 
     ESP_LOGW(TAG,"Connection lost. Sending RESTORE request.");   
-  }
 
   if( millis() - lastMsg > 5000 )
   {
@@ -44,7 +52,44 @@ void PowerMaxDevice::loop() {
   }
 }
 
-void PowerMaxDevice::on_message(const std::string &topic, const std::string &payload) {
+bool PowerMaxDevice::process_messsages() {
+  bool packetHandled = false;
+  PlinkBuffer commandBuffer ;
+  memset(&commandBuffer, 0, sizeof(commandBuffer));
+  char oneByte = 0;  
+  while (  (os_pmComPortRead(&oneByte, 1) == 1)  ) 
+  {     
+    if (commandBuffer.size<(MAX_BUFFER_SIZE-1))
+    {
+      *(commandBuffer.size+commandBuffer.buffer) = oneByte;
+      commandBuffer.size++;   
+      if(oneByte == 0x0A) //postamble received, let's see if we have full message
+      {
+        if(PowerMaxAlarm::isBufferOK(&commandBuffer))
+        {
+          ESP_LOGD(TAG,"--- new packet %d ----", millis());
+          packetHandled = true;
+          this->handlePacket(&commandBuffer);
+          commandBuffer.size = 0;
+          break;
+        }
+      }
+    }
+    else
+      ESP_LOGW(TAG,"Packet too big detected");
+  }
+
+  if(commandBuffer.size > 0)
+  {
+    packetHandled = true;
+    //this will be an invalid packet:
+    ESP_LOGW(TAG,"Passing invalid packet to packetManager");
+    this->handlePacket(&commandBuffer);
+  }
+  return packetHandled;
+}
+
+void PowerMaxDevice::on_mqtt_receive(const std::string &topic, const std::string &payload) {
   // do something with topic and payload
   ESP_LOGD(TAG,"Payload %s on topic %s received",payload.c_str(), topic.c_str());
 
@@ -174,10 +219,34 @@ void PowerMaxDevice::OnStatusUpdatePanel(const PlinkBuffer  * Buff)
     else
     {
       // ALARM_STATE_CHANGE 
-      // this->stat  pending    
-        SendAlarmState();
+      switch(  this->stat )
+      {
+        case SS_Disarm: 
+          mqtt_send( "disarmed", "", 0, ALARM_STATE_CHANGE);
+          break;
+        case SS_Exit_Delay:
+        case SS_Exit_Delay2:
+          mqtt_send( "arming", "", 0, ALARM_STATE_CHANGE);
+          break;
+        case SS_Armed_Home: 
+          mqtt_send( "armed_home", "", 0, ALARM_STATE_CHANGE);
+          break;
+        case SS_Armed_Away:
+          mqtt_send( "armed_away", "", 0, ALARM_STATE_CHANGE);
+          break;
+        case SS_Entry_Delay:    
+        case SS_User_Test:
+        case SS_Downloading:
+        case SS_Programming:
+        case SS_Installer:
+        case SS_Home_Bypass:
+        case SS_Away_Bypass:
+        case SS_Ready:
+        case SS_Not_Ready:
+            // Do NOTHING
+            break;
+      }
     }
-    
 }
 
 //Fired when system enters alarm state
@@ -205,98 +274,6 @@ void PowerMaxDevice::OnAlarmCancelled(unsigned char whoDisarmed, const char* who
     mqtt_send("disarmed" , whoDisarmedStr, 0, ALARM_STATE_CHANGE);  
 }
 
-const char* PowerMaxDevice::getZoneSensorType(unsigned char zoneId)
-{
-    if(zoneId < MAX_ZONE_COUNT &&
-        zone[zoneId].enrolled)
-    {
-        return zone[zoneId].sensorType;
-    }
-    return "Unknown";
-}
-
-void PowerMaxDevice::SendAlarmState()
-{
-    switch(  this->stat )
-    {
-      case SS_Disarm: 
-        mqtt_send( "disarmed", "", 0, ALARM_STATE_CHANGE);
-        break;
-      case SS_Exit_Delay:
-      case SS_Exit_Delay2:
-        mqtt_send( "arming", "", 0, ALARM_STATE_CHANGE);
-        break;
-      case SS_Armed_Home: 
-        mqtt_send( "armed_home", "", 0, ALARM_STATE_CHANGE);
-        break;
-      case SS_Armed_Away:
-        mqtt_send( "armed_away", "", 0, ALARM_STATE_CHANGE);
-        break;
-      case SS_Entry_Delay:    
-      case SS_User_Test:
-      case SS_Downloading:
-      case SS_Programming:
-      case SS_Installer:
-      case SS_Home_Bypass:
-      case SS_Away_Bypass:
-      case SS_Ready:
-      case SS_Not_Ready:
-          // Do NOTHING
-          break;
-
-    }
-}
-
-void PowerMaxDevice::CheckInactivityTimers() {
-    for(int ix=1; ix<=max_zone_id_enrolled; ix++) {
-        if (zone_motion[ix]) {
-            if ((os_getCurrentTimeSec() - zone[ix].lastEventTime) > inactivity_seconds) {
-                zone_motion[ix]= false;
-                mqtt_send(this->getZoneName(ix), "No Motion", ix, ZONE_STATE_CHANGE);  
-            }
-        }
-    }
-}
-
-bool PowerMaxDevice::serial_handler_() {
-bool packetHandled = false;
-PlinkBuffer commandBuffer ;
-memset(&commandBuffer, 0, sizeof(commandBuffer));
-char oneByte = 0;  
-while (  (os_pmComPortRead(&oneByte, 1) == 1)  ) 
-{     
-  if (commandBuffer.size<(MAX_BUFFER_SIZE-1))
-  {
-    *(commandBuffer.size+commandBuffer.buffer) = oneByte;
-    commandBuffer.size++;
-  
-    if(oneByte == 0x0A) //postamble received, let's see if we have full message
-    {
-      if(PowerMaxAlarm::isBufferOK(&commandBuffer))
-      {
-        ESP_LOGD(TAG,"--- new packet %d ----", millis());
-        packetHandled = true;
-        this->handlePacket(&commandBuffer);
-        commandBuffer.size = 0;
-        break;
-      }
-    }
-  }
-  else
-  {
-    ESP_LOGW(TAG,"Packet too big detected");
-  }
-}
-
-if(commandBuffer.size > 0)
-{
-  packetHandled = true;
-  //this will be an invalid packet:
-  ESP_LOGW(TAG,"Passing invalid packet to packetManager");
-  this->handlePacket(&commandBuffer);
-}
-return packetHandled;
-}
 
 }  // namespace powermax
 }  // namespace mqtt
