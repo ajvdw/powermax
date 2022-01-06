@@ -18,7 +18,6 @@ void PowerMaxDevice::setup() {
 }
 
 void PowerMaxDevice::loop() {
-  this->CheckInactivityTimers();
   static uint32_t lastMsg = 0;
   static uint32_t lastCmd = 0;
 
@@ -31,7 +30,6 @@ void PowerMaxDevice::loop() {
           }
       }
   }
-
   //Handle incoming messages
   if( this->process_messsages() )
     lastCmd = millis();
@@ -40,7 +38,7 @@ void PowerMaxDevice::loop() {
     this->sendNextCommand();
   if( this->restoreCommsIfLost()) //if we fail to get PINGs from the alarm - we will attempt to restore the connection 
     ESP_LOGW(TAG,"Connection lost. Sending RESTORE request.");   
-
+  //Broadcast verbose state every 5 seconds
   if( millis() - lastMsg > 5000 )
   {
     lastMsg = millis(); 
@@ -78,7 +76,6 @@ bool PowerMaxDevice::process_messsages() {
     else
       ESP_LOGW(TAG,"Packet too big detected");
   }
-
   if(commandBuffer.size > 0)
   {
     packetHandled = true;

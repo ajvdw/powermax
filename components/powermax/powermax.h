@@ -23,14 +23,14 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
  public:
   void setup() override;
   void loop() override;
- 
+  void log(int prio, const char* buf);
+
   virtual void OnStatusChange(const PlinkBuffer  * Buff);
   virtual void OnStatusUpdatePanel(const PlinkBuffer  * Buff);
   virtual void OnAlarmStarted(unsigned char alarmType, const char* alarmTypeStr, unsigned char zoneTripped, const char* zoneTrippedStr);
   virtual void OnAlarmCancelled(unsigned char whoDisarmed, const char* whoDisarmedStr);
   
 protected:
-  void log(int prio, const char* buf);
   bool process_messsages();
   void on_mqtt_receive(const std::string &topic, const std::string &payload);
   void mqtt_send(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID, int zone_or_system_update);
