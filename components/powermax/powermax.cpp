@@ -13,25 +13,27 @@ void PowerMaxDevice::setup() {
   ESP_LOGD(TAG, "Setup");
 
   std::string command_topic = App.get_name() + std::string("/alarm/input");
-  this->subscribe(command_topic, &PowerMaxDevice::on_mqtt_receive);
+  this->subscribe(command_topic, &PowerMaxDevice::on_mqtt_receive_);
   ESP_LOGD(TAG, "MQTT subscribed to %s", command_topic.c_str());
 }
 
 void PowerMaxDevice::loop() {
   static uint32_t lastMsg = 0;
   static uint32_t lastCmd = 0;
+  uint32_t max_zone_id_enrolled = MAX_ZONE_COUNT;
+  uint32_t inactivity_seconds = 20;
 
   // Check Inactivity Timers
   for (int ix = 1; ix <= max_zone_id_enrolled; ix++) {
-    if (zone_motion[ix]) {
+    if (zone_motion_[ix]) {
       if ((os_getCurrentTimeSec() - zone[ix].lastEventTime) > inactivity_seconds) {
-        zone_motion[ix] = false;
-        mqtt_send(this->getZoneName(ix), "No Motion", ix, ZONE_STATE_CHANGE);
+        zone_motion_[ix] = false;
+        mqtt_send_(this->getZoneName(ix), "No Motion", ix, ZONE_STATE_CHANGE);
       }
     }
   }
   // Handle incoming messages
-  if (this->process_messsages()) lastCmd = millis();
+  if (this->process_messsages_()) lastCmd = millis();
   // we ensure a small delay between commands, as it can confuse the alarm (it
   // has a slow CPU)
   if (millis() - lastCmd > 300 || millis() < lastCmd) this->sendNextCommand();
@@ -49,7 +51,7 @@ void PowerMaxDevice::loop() {
   }
 }
 
-bool PowerMaxDevice::process_messsages() {
+bool PowerMaxDevice::process_messsages_() {
   bool packetHandled = false;
   PlinkBuffer commandBuffer;
   memset(&commandBuffer, 0, sizeof(commandBuffer));
@@ -80,7 +82,7 @@ bool PowerMaxDevice::process_messsages() {
   return packetHandled;
 }
 
-void PowerMaxDevice::on_mqtt_receive(const std::string& topic, const std::string& payload) {
+void PowerMaxDevice::on_mqtt_receive_(const std::string& topic, const std::string& payload) {
   // do something with topic and payload
   ESP_LOGD(TAG, "Payload %s on topic %s received", payload.c_str(), topic.c_str());
 
@@ -94,7 +96,7 @@ void PowerMaxDevice::on_mqtt_receive(const std::string& topic, const std::string
     ESP.restart();
 }
 
-void PowerMaxDevice::mqtt_send(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID,
+void PowerMaxDevice::mqtt_send_(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID,
                                int zone_or_system_update) {
   // Translate from pmax.cpp - PmaxLogEvents to hass MQTT accepted payloads.
   ESP_LOGD(TAG, "Creating JSON string for MQTT");
@@ -175,16 +177,16 @@ void PowerMaxDevice::OnStatusChange(const PlinkBuffer* Buff) {
     case 0x51:  //"Arm Home"
     case 0x53:  //"Quick Arm Home"
       // do something...
-      mqtt_send("armed_home", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
+      mqtt_send_("armed_home", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
       break;
 
     case 0x52:  //"Arm Away"
     case 0x54:  //"Quick Arm Away"
-      mqtt_send("armed_away", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
+      mqtt_send_("armed_away", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
       break;
 
     case 0x55:  //"Disarm"
-      mqtt_send("disarmed", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
+      mqtt_send_("disarmed", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
       break;
   }
 }
@@ -198,7 +200,7 @@ void PowerMaxDevice::OnStatusUpdatePanel(const PlinkBuffer* Buff) {
     const unsigned char zoneId = Buff->buffer[5];
     ZoneEvent eventType = (ZoneEvent)Buff->buffer[6];
 
-    mqtt_send(this->getZoneName(zoneId), GetStrPmaxZoneEventTypes(Buff->buffer[6]), zoneId, ZONE_STATE_CHANGE);
+    mqtt_send_(this->getZoneName(zoneId), GetStrPmaxZoneEventTypes(Buff->buffer[6]), zoneId, ZONE_STATE_CHANGE);
     // If it is a Violated (motion) event then set zone activated
     if (eventType == ZE_Violated) {
       zone_motion[zoneId] = true;
@@ -207,17 +209,17 @@ void PowerMaxDevice::OnStatusUpdatePanel(const PlinkBuffer* Buff) {
     // ALARM_STATE_CHANGE
     switch (this->stat) {
       case SS_Disarm:
-        mqtt_send("disarmed", "", 0, ALARM_STATE_CHANGE);
+        mqtt_send_("disarmed", "", 0, ALARM_STATE_CHANGE);
         break;
       case SS_Exit_Delay:
       case SS_Exit_Delay2:
-        mqtt_send("arming", "", 0, ALARM_STATE_CHANGE);
+        mqtt_send_("arming", "", 0, ALARM_STATE_CHANGE);
         break;
       case SS_Armed_Home:
-        mqtt_send("armed_home", "", 0, ALARM_STATE_CHANGE);
+        mqtt_send_("armed_home", "", 0, ALARM_STATE_CHANGE);
         break;
       case SS_Armed_Away:
-        mqtt_send("armed_away", "", 0, ALARM_STATE_CHANGE);
+        mqtt_send_("armed_away", "", 0, ALARM_STATE_CHANGE);
         break;
       case SS_Entry_Delay:
       case SS_User_Test:
@@ -244,7 +246,7 @@ void PowerMaxDevice::OnAlarmStarted(unsigned char alarmType, const char* alarmTy
   // zoneTripped    : specifies zone that initiated the alarm, values from
   // PmaxEventSource zoneTrippedStr : zone name
 
-  mqtt_send("triggered", zoneTrippedStr, 0, ALARM_STATE_CHANGE);
+  mqtt_send_("triggered", zoneTrippedStr, 0, ALARM_STATE_CHANGE);
 }
 
 // Fired when alarm is cancelled
@@ -254,7 +256,7 @@ void PowerMaxDevice::OnAlarmCancelled(unsigned char whoDisarmed, const char* who
   // whoDisarmed    : specifies who cancelled the alarm (for example a keyfob
   // 1), values from PmaxEventSource whoDisarmedStr : text representation of who
   // disarmed Canceled
-  mqtt_send("disarmed", whoDisarmedStr, 0, ALARM_STATE_CHANGE);
+  mqtt_send_("disarmed", whoDisarmedStr, 0, ALARM_STATE_CHANGE);
 }
 
 }  // namespace powermax
