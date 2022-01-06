@@ -126,7 +126,7 @@ void PowerMaxDevice::log( int priority, const char* buf) {
     }    
 }
 
-virtual void PowerMaxDevice::OnStatusChange(const PlinkBuffer  * Buff)
+void PowerMaxDevice::OnStatusChange(const PlinkBuffer  * Buff)
 {
     //call base class implementation first, this will send ACK back and upate internal state.
     PowerMaxAlarm::OnStatusChange(Buff);
@@ -155,7 +155,7 @@ virtual void PowerMaxDevice::OnStatusChange(const PlinkBuffer  * Buff)
     }        
 }
 
-virtual void PowerMaxDevice::OnStatusUpdatePanel(const PlinkBuffer  * Buff)
+void PowerMaxDevice::OnStatusUpdatePanel(const PlinkBuffer  * Buff)
 {
     //call base class implementation first, to log the event and update states.
     PowerMaxAlarm::OnStatusUpdatePanel(Buff);
@@ -181,7 +181,7 @@ virtual void PowerMaxDevice::OnStatusUpdatePanel(const PlinkBuffer  * Buff)
 }
 
 //Fired when system enters alarm state
-virtual void PowerMaxDevice::OnAlarmStarted(unsigned char alarmType, const char* alarmTypeStr, unsigned char zoneTripped, const char* zoneTrippedStr)
+void PowerMaxDevice::OnAlarmStarted(unsigned char alarmType, const char* alarmTypeStr, unsigned char zoneTripped, const char* zoneTrippedStr)
 {
     //call base class implementation first, to log the event and update states.
     PowerMaxAlarm::OnAlarmStarted(alarmType, alarmTypeStr, zoneTripped, zoneTrippedStr);
@@ -195,7 +195,7 @@ virtual void PowerMaxDevice::OnAlarmStarted(unsigned char alarmType, const char*
 }
 
 //Fired when alarm is cancelled
-virtual void PowerMaxDevice::OnAlarmCancelled(unsigned char whoDisarmed, const char* whoDisarmedStr)
+void PowerMaxDevice::OnAlarmCancelled(unsigned char whoDisarmed, const char* whoDisarmedStr)
 {
     //call base class implementation first, to log the event and update states.
     PowerMaxAlarm::OnAlarmCancelled( whoDisarmed, whoDisarmedStr );
