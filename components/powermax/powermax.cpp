@@ -169,7 +169,6 @@ void PowerMaxDevice::OnStatusChange(const PlinkBuffer* Buff) {
   // Now send update to ST and use zone 0 as system state not zone
   unsigned char zoneId = 0;
 
-  arming = false;
   // now our customization:
 
   switch (Buff->buffer[4]) {

@@ -37,7 +37,6 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
                  int zone_or_system_update);
 
   bool zone_motion[MAX_ZONE_COUNT + 1] = {0};
-  bool arming = false;
   int inactivity_seconds = 20;
   int zones_enrolled_count = MAX_ZONE_COUNT;
   int max_zone_id_enrolled = MAX_ZONE_COUNT;
