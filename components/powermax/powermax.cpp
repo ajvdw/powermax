@@ -51,6 +51,27 @@ void PowerMaxDevice::loop() {
   }
 }
 
+void PowerMaxDevice::log(int priority, const char* buf) {
+  switch (priority) {
+    case LOG_EMERG:
+    case LOG_ALERT:
+    case LOG_CRIT:
+    case LOG_ERR:
+      ESP_LOGE(TAG, "%s", buf);
+      break;
+    case LOG_WARNING:
+      ESP_LOGW(TAG, "%s", buf);
+      break;
+    case LOG_NOTICE:
+    case LOG_INFO:
+      ESP_LOGI(TAG, "%s", buf);
+      break;
+    case LOG_DEBUG:
+      ESP_LOGD(TAG, "%s", buf);
+      break;
+  }
+}
+
 bool PowerMaxDevice::process_messsages_() {
   bool packetHandled = false;
   PlinkBuffer commandBuffer;
@@ -85,7 +106,6 @@ bool PowerMaxDevice::process_messsages_() {
 void PowerMaxDevice::on_mqtt_receive_(const std::string& topic, const std::string& payload) {
   // do something with topic and payload
   ESP_LOGD(TAG, "Payload %s on topic %s received", payload.c_str(), topic.c_str());
-
   if (payload == "DISARM")
     this->sendCommand(Pmax_DISARM);
   else if (payload == "ARM_HOME")
@@ -140,27 +160,6 @@ void PowerMaxDevice::mqtt_send_(const char* ZoneOrEvent, const char* WhoOrState,
       ESP_LOGD(TAG, "Success sending MQTT zone state message");
     else
       ESP_LOGD(TAG, "Error sending MQTT zone state message");
-  }
-}
-
-void PowerMaxDevice::log(int priority, const char* buf) {
-  switch (priority) {
-    case LOG_EMERG:
-    case LOG_ALERT:
-    case LOG_CRIT:
-    case LOG_ERR:
-      ESP_LOGE(TAG, "%s", buf);
-      break;
-    case LOG_WARNING:
-      ESP_LOGW(TAG, "%s", buf);
-      break;
-    case LOG_NOTICE:
-    case LOG_INFO:
-      ESP_LOGI(TAG, "%s", buf);
-      break;
-    case LOG_DEBUG:
-      ESP_LOGD(TAG, "%s", buf);
-      break;
   }
 }
 
