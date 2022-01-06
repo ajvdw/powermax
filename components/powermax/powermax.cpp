@@ -126,6 +126,178 @@ void PowerMaxDevice::log( int priority, const char* buf) {
     }    
 }
 
+virtual void PowerMaxDevice::OnStatusChange(const PlinkBuffer  * Buff)
+{
+    //call base class implementation first, this will send ACK back and upate internal state.
+    PowerMaxAlarm::OnStatusChange(Buff);
+    //Now send update to ST and use zone 0 as system state not zone 
+    unsigned char zoneId = 0;
+    
+    arming = false;
+    //now our customization:
+
+    switch(Buff->buffer[4])
+    {
+    case 0x51: //"Arm Home" 
+    case 0x53: //"Quick Arm Home"
+        //do something...
+        mqtt_send("armed_home", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
+        break;
+
+    case 0x52: //"Arm Away"
+    case 0x54: //"Quick Arm Away"
+        mqtt_send("armed_away", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
+        break;
+
+    case 0x55: //"Disarm"
+        mqtt_send("disarmed", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
+        break;
+    }        
+}
+
+virtual void PowerMaxDevice::OnStatusUpdatePanel(const PlinkBuffer  * Buff)
+{
+    //call base class implementation first, to log the event and update states.
+    PowerMaxAlarm::OnStatusUpdatePanel(Buff);
+
+    //Now if it is a zone event then send it to SmartThings
+    if (this->isZoneEvent()) {
+          const unsigned char zoneId = Buff->buffer[5];
+          ZoneEvent eventType = (ZoneEvent)Buff->buffer[6];
+          
+          mqtt_send(this->getZoneName(zoneId), GetStrPmaxZoneEventTypes(Buff->buffer[6]), zoneId, ZONE_STATE_CHANGE);
+          //If it is a Violated (motion) event then set zone activated
+          if (eventType == ZE_Violated) {
+              zone_motion[zoneId] = true;
+          }
+    }
+    else
+    {
+      // ALARM_STATE_CHANGE 
+      // this->stat  pending    
+        SendAlarmState();
+    }
+    
+}
+
+//Fired when system enters alarm state
+virtual void PowerMaxDevice::OnAlarmStarted(unsigned char alarmType, const char* alarmTypeStr, unsigned char zoneTripped, const char* zoneTrippedStr)
+{
+    //call base class implementation first, to log the event and update states.
+    PowerMaxAlarm::OnAlarmStarted(alarmType, alarmTypeStr, zoneTripped, zoneTrippedStr);
+    //alarmType      : type of alarm, first 9 values from PmaxLogEvents
+    //alarmTypeStr   : text representation of alarmType
+    //zoneTripped    : specifies zone that initiated the alarm, values from PmaxEventSource
+    //zoneTrippedStr : zone name
+
+    mqtt_send("triggered", zoneTrippedStr, 0, ALARM_STATE_CHANGE);
+
+}
+
+//Fired when alarm is cancelled
+virtual void PowerMaxDevice::OnAlarmCancelled(unsigned char whoDisarmed, const char* whoDisarmedStr)
+{
+    //call base class implementation first, to log the event and update states.
+    PowerMaxAlarm::OnAlarmCancelled( whoDisarmed, whoDisarmedStr );
+    //whoDisarmed    : specifies who cancelled the alarm (for example a keyfob 1), values from PmaxEventSource
+    //whoDisarmedStr : text representation of who disarmed
+    //Canceled
+    mqtt_send("disarmed" , whoDisarmedStr, 0, ALARM_STATE_CHANGE);  
+}
+
+const char* PowerMaxDevice::getZoneSensorType(unsigned char zoneId)
+{
+    if(zoneId < MAX_ZONE_COUNT &&
+        zone[zoneId].enrolled)
+    {
+        return zone[zoneId].sensorType;
+    }
+    return "Unknown";
+}
+
+void PowerMaxDevice::SendAlarmState()
+{
+    switch(  this->stat )
+    {
+      case SS_Disarm: 
+        mqtt_send( "disarmed", "", 0, ALARM_STATE_CHANGE);
+        break;
+      case SS_Exit_Delay:
+      case SS_Exit_Delay2:
+        mqtt_send( "arming", "", 0, ALARM_STATE_CHANGE);
+        break;
+      case SS_Armed_Home: 
+        mqtt_send( "armed_home", "", 0, ALARM_STATE_CHANGE);
+        break;
+      case SS_Armed_Away:
+        mqtt_send( "armed_away", "", 0, ALARM_STATE_CHANGE);
+        break;
+      case SS_Entry_Delay:    
+      case SS_User_Test:
+      case SS_Downloading:
+      case SS_Programming:
+      case SS_Installer:
+      case SS_Home_Bypass:
+      case SS_Away_Bypass:
+      case SS_Ready:
+      case SS_Not_Ready:
+          // Do NOTHING
+          break;
+
+    }
+}
+
+void PowerMaxDevice::CheckInactivityTimers() {
+    for(int ix=1; ix<=max_zone_id_enrolled; ix++) {
+        if (zone_motion[ix]) {
+            if ((os_getCurrentTimeSec() - zone[ix].lastEventTime) > inactivity_seconds) {
+                zone_motion[ix]= false;
+                mqtt_send(this->getZoneName(ix), "No Motion", ix, ZONE_STATE_CHANGE);  
+            }
+        }
+    }
+}
+
+bool PowerMaxDevice::serial_handler_() {
+bool packetHandled = false;
+PlinkBuffer commandBuffer ;
+memset(&commandBuffer, 0, sizeof(commandBuffer));
+char oneByte = 0;  
+while (  (os_pmComPortRead(&oneByte, 1) == 1)  ) 
+{     
+  if (commandBuffer.size<(MAX_BUFFER_SIZE-1))
+  {
+    *(commandBuffer.size+commandBuffer.buffer) = oneByte;
+    commandBuffer.size++;
+  
+    if(oneByte == 0x0A) //postamble received, let's see if we have full message
+    {
+      if(PowerMaxAlarm::isBufferOK(&commandBuffer))
+      {
+        ESP_LOGD(TAG,"--- new packet %d ----", millis());
+        packetHandled = true;
+        this->handlePacket(&commandBuffer);
+        commandBuffer.size = 0;
+        break;
+      }
+    }
+  }
+  else
+  {
+    ESP_LOGW(TAG,"Packet too big detected");
+  }
+}
+
+if(commandBuffer.size > 0)
+{
+  packetHandled = true;
+  //this will be an invalid packet:
+  ESP_LOGW(TAG,"Passing invalid packet to packetManager");
+  this->handlePacket(&commandBuffer);
+}
+return packetHandled;
+}
+
 }  // namespace powermax
 }  // namespace mqtt
 }  // namespace esphome
