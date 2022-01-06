@@ -38,188 +38,24 @@ class PowerMaxDevice : public PowerMaxAlarm, public uart::UARTDevice, public mqt
   void on_message(const std::string &topic, const std::string &payload);
   void mqtt_send(const char* ZoneOrEvent, const char* WhoOrState, const unsigned char zoneID, int zone_or_system_update);
  
-////////////////////////////////////////////////
-    bool zone_motion[MAX_ZONE_COUNT+1] = {0};
-    bool arming = false;
-    //Inactivity timer wil always default to this value on boot (it is not stored in EEPROM at the moment, though only resets when the Powermax power cycles (hence rarely))
-    int inactivity_seconds = 20;
-    //Variables for managing zones
-    int zones_enrolled_count = MAX_ZONE_COUNT;
-    int max_zone_id_enrolled = MAX_ZONE_COUNT;
-    
-    virtual void OnStatusChange(const PlinkBuffer  * Buff)
-    {
-        //call base class implementation first, this will send ACK back and upate internal state.
-        PowerMaxAlarm::OnStatusChange(Buff);
-        //Now send update to ST and use zone 0 as system state not zone 
-        unsigned char zoneId = 0;
-        
-        arming = false;
-        //now our customization:
-
-        switch(Buff->buffer[4])
-        {
-        case 0x51: //"Arm Home" 
-        case 0x53: //"Quick Arm Home"
-            //do something...
-            mqtt_send("armed_home", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
-            break;
-
-        case 0x52: //"Arm Away"
-        case 0x54: //"Quick Arm Away"
-            mqtt_send("armed_away", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
-            break;
-
-        case 0x55: //"Disarm"
-            mqtt_send("disarmed", GetStrPmaxEventSource(Buff->buffer[3]), zoneId, ALARM_STATE_CHANGE);
-            break;
-        }        
-    }
-
-    const char* getZoneSensorType(unsigned char zoneId)
-    {
-        if(zoneId < MAX_ZONE_COUNT &&
-           zone[zoneId].enrolled)
-        {
-            return zone[zoneId].sensorType;
-        }
-        return "Unknown";
-    }
- 
-    virtual void OnStatusUpdatePanel(const PlinkBuffer  * Buff)
-    {
-        //call base class implementation first, to log the event and update states.
-        PowerMaxAlarm::OnStatusUpdatePanel(Buff);
-
-        //Now if it is a zone event then send it to SmartThings
-        if (this->isZoneEvent()) {
-              const unsigned char zoneId = Buff->buffer[5];
-              ZoneEvent eventType = (ZoneEvent)Buff->buffer[6];
-              
-              mqtt_send(this->getZoneName(zoneId), GetStrPmaxZoneEventTypes(Buff->buffer[6]), zoneId, ZONE_STATE_CHANGE);
-              //If it is a Violated (motion) event then set zone activated
-              if (eventType == ZE_Violated) {
-                  zone_motion[zoneId] = true;
-              }
-        }
-        else
-        {
-          // ALARM_STATE_CHANGE 
-          // this->stat  pending    
-            SendAlarmState();
-        }
-        
-    }
-
-    //Fired when system enters alarm state
-    virtual void OnAlarmStarted(unsigned char alarmType, const char* alarmTypeStr, unsigned char zoneTripped, const char* zoneTrippedStr)
-    {
-        //call base class implementation first, to log the event and update states.
-        PowerMaxAlarm::OnAlarmStarted(alarmType, alarmTypeStr, zoneTripped, zoneTrippedStr);
-        //alarmType      : type of alarm, first 9 values from PmaxLogEvents
-        //alarmTypeStr   : text representation of alarmType
-        //zoneTripped    : specifies zone that initiated the alarm, values from PmaxEventSource
-        //zoneTrippedStr : zone name
-
-        mqtt_send("triggered", zoneTrippedStr, 0, ALARM_STATE_CHANGE);
-
-    }
-
-    //Fired when alarm is cancelled
-    virtual void OnAlarmCancelled(unsigned char whoDisarmed, const char* whoDisarmedStr)
-    {
-        //call base class implementation first, to log the event and update states.
-        PowerMaxAlarm::OnAlarmCancelled( whoDisarmed, whoDisarmedStr );
-        //whoDisarmed    : specifies who cancelled the alarm (for example a keyfob 1), values from PmaxEventSource
-        //whoDisarmedStr : text representation of who disarmed
-        //Canceled
-        mqtt_send("disarmed" , whoDisarmedStr, 0, ALARM_STATE_CHANGE);  
-    }
-
-    void SendAlarmState()
-    {
-        switch(  this->stat )
-        {
-          case SS_Disarm: 
-            mqtt_send( "disarmed", "", 0, ALARM_STATE_CHANGE);
-            break;
-          case SS_Exit_Delay:
-          case SS_Exit_Delay2:
-            mqtt_send( "arming", "", 0, ALARM_STATE_CHANGE);
-            break;
-          case SS_Armed_Home: 
-            mqtt_send( "armed_home", "", 0, ALARM_STATE_CHANGE);
-            break;
-          case SS_Armed_Away:
-            mqtt_send( "armed_away", "", 0, ALARM_STATE_CHANGE);
-            break;
-          case SS_Entry_Delay:    
-          case SS_User_Test:
-          case SS_Downloading:
-          case SS_Programming:
-          case SS_Installer:
-          case SS_Home_Bypass:
-          case SS_Away_Bypass:
-          case SS_Ready:
-          case SS_Not_Ready:
-              // Do NOTHING
-              break;
-
-        }
-    }
-    
-    void CheckInactivityTimers() {
-        for(int ix=1; ix<=max_zone_id_enrolled; ix++) {
-            if (zone_motion[ix]) {
-                if ((os_getCurrentTimeSec() - zone[ix].lastEventTime) > inactivity_seconds) {
-                    zone_motion[ix]= false;
-                    mqtt_send(this->getZoneName(ix), "No Motion", ix, ZONE_STATE_CHANGE);  
-                }
-            }
-        }
-    }
-
- 
+  virtual void OnStatusChange(const PlinkBuffer  * Buff);
+  const char* getZoneSensorType(unsigned char zoneId);
+  virtual void OnStatusUpdatePanel(const PlinkBuffer  * Buff);
+  virtual void OnAlarmStarted(unsigned char alarmType, const char* alarmTypeStr, unsigned char zoneTripped, const char* zoneTrippedStr);
+  virtual void OnAlarmCancelled(unsigned char whoDisarmed, const char* whoDisarmedStr);
+  void SendAlarmState();
+  void CheckInactivityTimers();
 protected:
-  bool serial_handler_() {
-    bool packetHandled = false;
-    PlinkBuffer commandBuffer ;
-    memset(&commandBuffer, 0, sizeof(commandBuffer));
-    char oneByte = 0;  
-    while (  (os_pmComPortRead(&oneByte, 1) == 1)  ) 
-    {     
-      if (commandBuffer.size<(MAX_BUFFER_SIZE-1))
-      {
-        *(commandBuffer.size+commandBuffer.buffer) = oneByte;
-        commandBuffer.size++;
-      
-        if(oneByte == 0x0A) //postamble received, let's see if we have full message
-        {
-          if(PowerMaxAlarm::isBufferOK(&commandBuffer))
-          {
-            ESP_LOGD(TAG,"--- new packet %d ----", millis());
-            packetHandled = true;
-            this->handlePacket(&commandBuffer);
-            commandBuffer.size = 0;
-            break;
-          }
-        }
-      }
-      else
-      {
-        ESP_LOGW(TAG,"Packet too big detected");
-      }
-    }
+  bool serial_handler_();
 
-    if(commandBuffer.size > 0)
-    {
-      packetHandled = true;
-      //this will be an invalid packet:
-      ESP_LOGW(TAG,"Passing invalid packet to packetManager");
-      this->handlePacket(&commandBuffer);
-    }
-    return packetHandled;
-  }
+  bool zone_motion[MAX_ZONE_COUNT+1] = {0};
+  bool arming = false;
+  //Inactivity timer wil always default to this value on boot (it is not stored in EEPROM at the moment, though only resets when the Powermax power cycles (hence rarely))
+  int inactivity_seconds = 20;
+  //Variables for managing zones
+  int zones_enrolled_count = MAX_ZONE_COUNT;
+  int max_zone_id_enrolled = MAX_ZONE_COUNT;
+
 };
 
 }  // namespace powermax
