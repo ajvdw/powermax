@@ -203,7 +203,7 @@ void PowerMaxDevice::OnStatusUpdatePanel(const PlinkBuffer* Buff) {
     mqtt_send_(this->getZoneName(zoneId), GetStrPmaxZoneEventTypes(Buff->buffer[6]), zoneId, ZONE_STATE_CHANGE);
     // If it is a Violated (motion) event then set zone activated
     if (eventType == ZE_Violated) {
-      zone_motion[zoneId] = true;
+      zone_motion_[zoneId] = true;
     }
   } else {
     // ALARM_STATE_CHANGE
